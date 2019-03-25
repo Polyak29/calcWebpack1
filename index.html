@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta id="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <link rel="stylesheet" href="dist/style.css"/>
+    <title>Calc</title>
+  </head>
+  <body>
+    <div class="calculator">
+      <div class="calculator__display">
+        <div class="calculator__display-types">
+          <button class="calculator__display-types--size">≡ </button>
+        </div>
+        <div class="calculator__display-input">
+          <input class="calculator__display-input--shadow" type="text" value=" " pattern="^[ 0-9]+$" disabled="disabled"/>
+          <input class="calculator__display-input--size" type="text" value="0" pattern="^[ 0-9]+$" disabled="disabled"/>
+          <input class="calculator__display-input--hidden" type="hidden" pattern="^[ 0-9]+$" disabled="disabled"/>
+          <input class="calculator__display-input--hidden2" type="hidden" pattern="^[ 0-9]+$" disabled="disabled"/>
+          <input class="calculator__display-input--memory" type="text" value=" " pattern="^[ 0-9]+$" disabled="disabled"/>
+        </div>
+        <div class="calculator__display-memory memory-calculator">
+          <div class="memory-calculator__operations">
+            <button class="memory-calculator__operations--size" >MC</button>
+          </div>
+          <div class="memory-calculator__operations">
+            <button class="memory-calculator__operations--size" >MR</button>
+          </div>
+          <div class="memory-calculator__operations">
+            <button class="memory-calculator__operations--size" >M+</button>
+          </div>
+          <div class="memory-calculator__operations">
+            <button class="memory-calculator__operations--size" >M-</button>
+          </div>
+          <div class="memory-calculator__operations">
+            <button class="memory-calculator__operations--size" >MS</button>
+          </div>
+          <div class="memory-calculator__operations">
+            <button class="memory-calculator__operations--size">M</button>
+          </div>
+        </div>
+      </div>
+      <div class="calculator__keyboard">
+        <div class="calculator__keyboard-container">    
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation" id="percent">%</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation" id="sqrt">√</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation operationButton" value="^">x <sup>n</sup></button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation" id="fraction"><sup>1</sup>/x</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">           
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation cleanButton">CE</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation cleanButton">C</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation cleanButton">⇐</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation operationButton">÷</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">       
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="7">7</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="8">8</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="9">9</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation operationButton">×</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="4">4</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="5">5</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="6">6</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation operationButton">-</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="1">1</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="2">2</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="3">3</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation operationButton">+</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation" id="change">±</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number" value="0">0</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation" id="comma">,</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation operationButton">=</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="dist/main.js" defer="true" rel='script'></script>
+  </body>
+</html>
