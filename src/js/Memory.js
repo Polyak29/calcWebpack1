@@ -1,3 +1,11 @@
+let display = document.querySelector('.calculator__display-input--size');
+let archive = document.querySelector('.calculator__display-input--shadow');
+let hidden = document.querySelector('.calculator__display-input--hidden');
+let hidden2 = document.querySelector('.calculator__display-input--hidden2');
+let CurrentNumber = 0;
+let newNumber = false;
+let pendingOperation = '';
+let memory = document.getElementsByClassName('calculator__display-input--memory')[0];
 let memory = document.getElementsByClassName('calculator__display-input--memory')[0];
 class Memory {
     constructor () {
