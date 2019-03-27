@@ -14,9 +14,9 @@ class Memory {
 
             case 'MR':
             if (memory.value == '') {
-                display.value = '0';
+                this.display.value = '0';
             } else {
-                display.value = memory.value;
+                this.display.value = memory.value;
             }
             break;
 
@@ -37,10 +37,10 @@ class Memory {
             break;
 
             case 'MS':
-            if (display.value == '0' || '') {
+            if (this.display.value == '0' || '') {
                 memory.value = memory.value;
             } else {
-                memory.value = display.value;
+                memory.value = this.display.value;
             }
             break;
 

@@ -1,6 +1,6 @@
 import Memory from './Memory';
 
-let display = document.querySelector('.calculator__display-input--size');
+
 let archive = document.querySelector('.calculator__display-input--shadow');
 let hidden = document.querySelector('.calculator__display-input--hidden');
 let hidden2 = document.querySelector('.calculator__display-input--hidden2');
@@ -12,184 +12,192 @@ let memory = document.getElementsByClassName('calculator__display-input--memory'
 
 class Calculator {
     constructor() {
-        [...document.getElementsByClassName('calculator__keyboard-button--number')].forEach(el =>{
-            el.addEventListener('click', this.insert);
-        });
-        
-        [...document.getElementsByClassName('operationButton')].forEach(el =>{
-            el.addEventListener('click', this.calculation);
-            });
-       
-        [...document.getElementsByClassName('cleanButton')].forEach(el =>{
-            el.addEventListener('click', this.clean);
-        });
+        // this.insert = this.insert.bind(this)   
+        this.display = document.querySelector('.calculator__display-input--size');
+        this.archive = document.querySelector('.calculator__display-input--shadow');
+        this.hidden = document.querySelector('.calculator__display-input--hidden');
+        this.hidden2 = document.querySelector('.calculator__display-input--hidden2');
+        this.CurrentNumber = 0;
+        this.newNumber = false;
+        this.pendingOperation = '';
+        this.memory = document.getElementsByClassName('calculator__display-input--memory')[0];
 
-        document.getElementById('sqrt').addEventListener('click', this.sqrt);
-        document.getElementById('fraction').addEventListener('click', this.fraction);
-        document.getElementById('change').addEventListener('click', this.change);
-        document.getElementById('percent').addEventListener('click', this.percent);
-        document.getElementById('comma').addEventListener('click', this.comma);
+        function listenClass(classSelector,nameMethod){
+            [...document.getElementsByClassName(classSelector)].forEach(el =>{
+                el.addEventListener('click', nameMethod);
+            })
+        };
+        listenClass('calculator__keyboard-button--number', this.insert);
+        listenClass('operationButton', this.calculation);
+        listenClass('cleanButton', this.clean);
+
+        function listenId(IdSelector, nameMethod) {
+            document.getElementById(IdSelector).addEventListener('click', nameMethod);
+        };
+        listenId('sqrt', this.sqrt);
+        listenId('fraction', this.fraction);
+        listenId('change', this.change);
+        listenId('percent', this.percent);
+        listenId('comma', this.comma);
         
     };
 
-    
-    insert(event) {
+    insert = (event) => {
         let number = event.target.textContent;
-        if (newNumber) {
-            display.value = number;
-            newNumber = false;
+        if (this.newNumber) {
+            this.display.value = number;
+            this.newNumber = false;
         } else {
-            if (display.value === '0'){
-                display.value = number;
+            if (this.display.value === '0'){
+                this.display.value = number;
             } else {
-                display.value += number;
+                this.display.value += number;
             }
         }
        
     }
 
 
-    calculation(op) {
-        let operation = op.target.textContent;
-        let localOperation = +display.value;
-        let localHidden = +hidden.value;
-        let localSign = hidden2.value;
-        let localArchive = archive.value.split(/[\+\*\-\/]/);
+    calculation = (event) => {
+        let operation = event.target.textContent;
+        let localOperation = +this.display.value;
+        let localHidden = +this.hidden.value;
+        let localSign = this.hidden2.value;
+        let localArchive = this.archive.value.split(/[\+\*\-\/]/);
         let round = 0;
         localArchive[0] = localArchive[0].trim();
         
         
-        if(newNumber && pendingOperation === '=') {
+        if(this.newNumber && this.pendingOperation === '=') {
             if(localSign.search(/[\+\*\/\-]/) !== '-1' && operation !== '=') {
                 localSign = operation;
-                hidden2.value = localSign;
+                this.hidden2.value = localSign;
             } else {
-            CurrentNumber = eval(CurrentNumber + localSign + localHidden);
+            this.CurrentNumber = eval(this.CurrentNumber + localSign + localHidden);
             }
         } else if (newNumber && pendingOperation !== '=') {
-            display.value = CurrentNumber;
-            hidden.value = CurrentNumber;
+            this.display.value = this.CurrentNumber;
+            this.hidden.value = this.CurrentNumber;
         }
         else {
-            newNumber = true;
-            switch(pendingOperation) {
+            this.newNumber = true;
+            switch(this.pendingOperation) {
                 case '+':
-                    CurrentNumber = CurrentNumber + +localOperation;
-                    hidden2.value = pendingOperation;
-                    hidden.value = localOperation;
+                    this.CurrentNumber = this.CurrentNumber + +localOperation;
+                    this.hidden2.value = pendingOperation;
+                    this.hidden.value = localOperation;
                 break;
                 case '×':
-                    CurrentNumber = CurrentNumber * +localOperation;
-                    hidden2.value = '*';
-                    hidden.value = localOperation;
+                    this.CurrentNumber = this.CurrentNumber * +localOperation;
+                    this.hidden2.value = '*';
+                    this.hidden.value = localOperation;
                     break;
                 case '÷':
-                    CurrentNumber = CurrentNumber / +localOperation;
-                    hidden2.value = '/';
-                    hidden.value = localOperation;
+                    this.CurrentNumber = this.CurrentNumber / +localOperation;
+                    this.hidden2.value = '/';
+                    this.hidden.value = localOperation;
                     break;
                 case '-':
-                    CurrentNumber = CurrentNumber - +localOperation;
-                    hidden2.value = pendingOperation;
-                    hidden.value = localOperation;
+                    this.CurrentNumber = this.CurrentNumber - +localOperation;
+                    this.hidden2.value = pendingOperation;
+                    this.hidden.value = localOperation;
                     break;
                 case 'x n':
-                    CurrentNumber = Math.pow(CurrentNumber, localOperation)
+                    this.CurrentNumber = Math.pow(this.CurrentNumber, localOperation)
                     break;
                 case '':
-                    CurrentNumber = localOperation;
+                    this.CurrentNumber = localOperation;
             }
         }
      
-            pendingOperation =  operation;
-            round = +CurrentNumber;
-            display.value = +round.toFixed(2); 
-            if (pendingOperation !== '='){
-                if (localArchive[0] === display.value || localArchive[localArchive.length - 2] === display.value) {
-                    archive.value = archive.value;
+            this.pendingOperation =  operation;
+            round = +this.CurrentNumber;
+            this.display.value = +round.toFixed(2); 
+            if (this.pendingOperation !== '='){
+                if (localArchive[0] === this.display.value || localArchive[localArchive.length - 2] === this.display.value) {
+                    this.archive.value = this.archive.value;
                 } else
-                archive.value += localOperation + pendingOperation;
-            } else archive.value = '';
+                this.archive.value += localOperation + this.pendingOperation;
+            } else this.archive.value = '';
     }
 
-    clean(del) {
-        if(del.target.textContent === 'C') {
-            display.value = '0';
-            archive.value = '';
-            hidden.value = '';
-            CurrentNumber = 0;
-            pendingOperation = '';
-        } else if(del.target.textContent === 'CE') {
-            display.value = '0';
+    clean = (event) => {
+        if(event.target.textContent === 'C') {
+            this.display.value = '0';
+            this.archive.value = '';
+            this.hidden.value = '';
+            this.CurrentNumber = 0;
+            this.pendingOperation = '';
+        } else if(event.target.textContent === 'CE') {
+            this.display.value = '0';
         } else {
-            if(display.value.slice(0, -1) === '') {
-                display.value = '0';
+            if(this.display.value.slice(0, -1) === '') {
+                this.display.value = '0';
             } else
-            display.value = display.value.slice(0, -1);
+            this.display.value = this.display.value.slice(0, -1);
         }
     }
 
-    change() {
-        if(display.value > '0') {
-            display.value = -display.value;
-            hidden.value = display.value;
+    change = () => {
+        if(this.display.value > '0') {
+            this.display.value = -this.display.value;
+            this.hidden.value = this.display.value;
         } else {
-            display.value = -display.value;
-            hidden.value = display.value;
+            this.display.value = -this.display.value;
+            this.hidden.value = display.value;
         }
     }
 
-    fraction() {
+    fraction = () => {
         let round = 0;
     
-        archive.value = '1' + '/' + '(' + display.value + ')'; 
+        this.archive.value = '1' + '/' + '(' + this.display.value + ')'; 
     
-        display.value = 1 / display.value;
+        this.display.value = 1 / this.display.value;
     
-        round = +display.value;
+        round = +this.display.value;
         
-        display.value = +round.toFixed(3);
+        this.display.value = +round.toFixed(3);
     }
 
-    sqrt() {
+    sqrt = () => {
         let round = 0;
-        archive.value = 'SQRT' + '(' + display.value + ')';
+        this.archive.value = 'SQRT' + '(' + this.display.value + ')';
     
-        display.value = Math.sqrt(display.value);
+        this.display.value = Math.sqrt(this.display.value);
     
-        round = +display.value;
+        round = +this.display.value;
     
-        display.value = +round.toFixed(2);
+        this.display.value = +round.toFixed(2);
     }
 
-    percent = function() {
-        z = archive.value.split(/[\+\×\-\÷]/);
+    percent = () => {
+        z = this.archive.value.split(/[\+\×\-\÷]/);
     
-        g = archive.value.match(/[\+\×\-\÷]/);
+        g = this.archive.value.match(/[\+\×\-\÷]/);
         
-        display.value = z[0] * display.value / 100;
+        this.display.value = z[0] * this.display.value / 100;
     
-        archive.value = z[0] + g[0] + display.value;
-        hidden.value = display.value;
+        this.archive.value = z[0] + g[0] + this.display.value;
+        this.hidden.value = this.display.value;
     }
 
-    comma() {
-        let localComma = display.value;
+    comma = () => {
+        let localComma = this.display.value;
      
-        if (newNumber) {
+        if (this.newNumber) {
             localComma = '0.'
-            newNumber = false;
+            this.newNumber = false;
         } else {
             if ( localComma.indexOf('.') === -1 ) {
                 localComma += '.'
             };
         };
-        display.value = localComma;
+        this.display.value = localComma;
     }
    
 }
-new Calculator();
-new Memory();
+
 export {Calculator, Memory};
 
 
