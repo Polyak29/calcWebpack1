@@ -1,3 +1,2 @@
-import {Calculator, Memory} from './calculator'
+import Calculator from './calculator'
 new Calculator();
-new Memory();

@@ -1,15 +1,11 @@
-export let display = document.querySelector('.calculator__display-input--size');
+class Display {
+	constructor() {
+        this.display = document.querySelector('.calculator__display-input--size');
+        this.archive = document.querySelector('.calculator__display-input--shadow');
+        this.memory = document.querySelector('.calculator__display-input--memory');
+        this.hidden = document.querySelector('.calculator__display-input--hidden');
+        this.hidden2 = document.querySelector('.calculator__display-input--hidden2');
+    }
+}
 
-export let archive = document.querySelector('.calculator__display-input--shadow');
-
-export let hidden = document.querySelector('.calculator__display-input--hidden');
-
-export let hidden2 = document.querySelector('.calculator__display-input--hidden2');
-
-export let CurrentNumber = 0;
-
-export var newNumber = false;
-
-export let pendingOperation = '';
-
-export let memory = document.getElementsByClassName('calculator__display-input--memory')[0];
+export default Display;

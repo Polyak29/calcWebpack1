@@ -1,46 +1,49 @@
+import Display from "./display";
 
 class Memory {
     constructor () {
+        this.disp = new Display(this.display);
+        this.mem = new Display(this.memory);
         [...document.getElementsByClassName('memory-calculator__operations--size')].forEach(el =>{
-            el.addEventListener('click', this.memory);
+            el.addEventListener('click', this.workMemory);
         });
     }
 
-    memory(event) {
+    workMemory = (event) => {
         switch(event.target.textContent) {
             case 'MC':
-            memory.value = '';
+            this.mem.memory.value = '';
             break;
 
             case 'MR':
-            if (memory.value == '') {
-                this.display.value = '0';
+            if (this.mem.memory.value == '') {
+                this.disp.display.value= '0';
             } else {
-                this.display.value = memory.value;
+                this.disp.display.value = this.mem.memory.value;
             }
             break;
 
             case 'M+':
-            if (display.value == '0' || '') {
-                memory.value = memory.value;
+            if (this.disp.display.value == '0' || '') {
+                this.mem.memory.value = this.mem.memory.value;
             } else {
-                memory.value = +display.value + +memory.value
+                this.mem.memory.value = +this.disp.display.value + +this.mem.memory.value
             }
             break;
 
             case 'M-':
-            if (display.value == '0' || '') {
-                memory.value = memory.value;
+            if (this.disp.display.value == '0' || '') {
+                this.mem.memory.value = this.mem.memory.value;
             } else {
-                memory.value = +memory.value  -  +display.value
+                this.mem.memory.value = +this.mem.memory.value  -  +this.disp.display.value
             }
             break;
 
             case 'MS':
-            if (this.display.value == '0' || '') {
-                memory.value = memory.value;
+            if (this.disp.display.value == '0' || '') {
+                this.mem.memory.value = this.mem.memory.value;
             } else {
-                memory.value = this.display.value;
+                this.mem.memory.value = this.disp.display.value;
             }
             break;
 
