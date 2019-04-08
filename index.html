@@ -10,8 +10,17 @@
   <body>
     <div class="calculator">
       <div class="calculator__display">
-        <div class="calculator__display-types">
-          <button class="calculator__display-types--size">≡ </button>
+        <div class="calculator__display-hat hat">
+          <div class="hat__title">Calculator</div>
+          <div class="hat__buttons">
+              <div class="hat__buttons-rollUp"></div>
+              <div class="hat__buttons-expand"></div>
+              <div class="hat__buttons-close"></div>
+          </div>
+        </div>    
+        <div class="calculator__display-types types">
+          <div class="types__btn">≡ </div>
+          <div class="types__name"> Standard </div>
         </div>
         <div class="calculator__display-input">
           <input class="calculator__display-input--shadow" type="text" value="" pattern="^[ 0-9]+$" disabled="disabled"/>
