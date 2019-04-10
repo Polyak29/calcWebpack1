@@ -1,8 +1,12 @@
-.body{
+body{
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
 }
 
 .calculator{
+    position: absolute;
+    right: 0rem;
+    top: 4.5rem;
     display:flex;
     flex-flow: column nowrap;
     justify-content: center;
@@ -11,6 +15,7 @@
     flex-basis:0;
     background:#dfdfdf;
     box-sizing: border-box;
+    box-shadow: 0 0 5px #3b6, 0 0 1em #022;
 
     &__display{
         display: flex;
@@ -18,10 +23,11 @@
         align-items: stretch;
         background:rgb(223, 223, 223);
         &-hat{
-            // display: flex;
+            display: flex;  
         }
         .hat{
             display: flex;
+            margin: 0px 2px 7px 5px;
             &__title{
                 flex: 0 0 65%;
                 display: flex;
@@ -40,9 +46,7 @@
                     height: 10px;
                     width: 10px;
                     border-bottom: 1px solid black;
-                    opacity: 0.5;
                     &:hover {
-                        opacity: 1;
                         cursor: pointer;
                       }
                 }
@@ -50,9 +54,7 @@
                     height: 10px;
                     width: 10px;
                     border: 1px solid black;
-                    opacity: 0.5;
                     &:hover {
-                        opacity: 1;
                         cursor: pointer;
                       }
                     
@@ -68,8 +70,8 @@
                         width: 1px;
                         background-color: #000;
                         transform: rotate(45deg);
-                        opacity: 0.8;
                         margin-left: 4px;
+                        box-shadow: 0 0 10px rgba(0,0,0,0.5);
                     }
                     &::after{
                         content: "";
@@ -78,11 +80,9 @@
                         width: 1px;
                         background-color: #000;
                         transform: rotate(-45deg);
-                        opacity: 0.8;
                         margin-left: 4px;
                     }
                     &:hover {
-                        opacity: 1;
                         cursor: pointer;
                     }
  }
@@ -91,7 +91,7 @@
         
         .types{
             display: flex;
-            margin: 15px 0px 0px 17px;
+            margin: 6px 0 0 17px;
             &__btn{
                 flex: 0 0 10%;
                 font-size: 20px;
@@ -228,7 +228,47 @@
     }
 }
 
+.disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.3;
+}
 
+.openCalc{
+    position: absolute;
+    right: 1rem;
+    top: 33rem;
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    background: #b9b9b9;
+    display:none;
+    justify-content: center;
+    align-items: center;
+    animation:pulsing 2s infinite;
+    box-shadow:  0 0 6px #3B6, 0 0 4em #022;
+    @keyframes pulsing {
+        
+        0% {
+          transform: scale(0.7, 0.7)
+          
+        }
+        50% {
+          transform: scale(1.0, 1.0);
+          
+        }
+        100% {
+          transform: scale(0.7, 0.7);
+          
+        }
+    }
 
-
+    &__text{
+        text-align: center;
+        cursor: pointer;
+        font-family: a_BighausTitulBrkHll;
+        text-shadow: 1px 1px 5px #387, 0 0 1em #fff;
+        color: #ffffffbf;
+    }
+}
 
