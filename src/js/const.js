@@ -1,11 +1,18 @@
  export const operations = {
-   plus: '+',
-   minus: '-',
+   PLUS: '+',
+   MINUS: '-',
    MULTIPLY: '*',
    DIVIDE: '÷', 
-   pow: 'pow',
-   frac: 'frac',
-   sqrt: 'sqrt',
-   negate: 'negate',
-   percent: 'percent'    
+   POW: 'POW',
+   FRAC: 'FRAC',
+   RESULT: '=',
+   SQRT: 'sqrt',
+   NEGATE: 'NEGATE',
+   PERCENT: 'PERCENT'    
+ };
+
+ export const cleaningButtons = {
+   CLEAN_ELEMENT: 'CE',
+   CLEAN: 'C',
+   REMOVE_LAST_SYMBOL: '⇐'
  };

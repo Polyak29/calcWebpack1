@@ -2,28 +2,26 @@ import Memory from './Memory';
 import Display from './display';
 import OnOff from './startCalc';
 import LocalStor from './localStorage';
+import {operations, cleaningButtons} from './const'
+import TempStorage from './tempStorage';
 
 // new Memory();
 new OnOff();
 class Calculator {
   constructor() {
-    this.display = document.querySelector('.calculator__display-input--size');
-    this.archive = document.querySelector('.calculator__display-input--shadow');
-    this.memory = document.querySelector('.calculator__display-input--memory');
-    this.hidden = document.querySelector('.calculator__display-input--hidden');
-    this.hidden2 = document.querySelector(
-      '.calculator__display-input--hidden2'
-    );
-    this.disp = new Display();
-    this.CurrentNumber = 0;
-    this.newNumber = false;
-    this.pendingOperation = '';
+    this.display = new Display();
+    this.tempStorage = new TempStorage();
+    this.resultOperation = 0;
+    this.isSecondOperand = false;
+    this.pastOperation = '';
+    this.currentOperation = '';
     this.myStorage = localStorage;
     this.motion();
 
     this.listenClass('calculator__keyboard-button--number', this.insert);
-    this.listenClass('operationButton', this.calculation);
+    this.listenClass('operationButton', this.operation);
     this.listenClass('cleanButton', this.clean);
+    this.listenClass('resultButton', this.calculateResult);
 
     this.listenId('sqrt', this.sqrt);
     this.listenId('fraction', this.fraction);
@@ -42,139 +40,125 @@ class Calculator {
     document.getElementById(IdSelector).addEventListener('click', nameMethod);
   };
 
+  calculateResult = () => {
+    let resultOperation = 0;
+    
+    const firstOperand = this.tempStorage.getTempStoreForFirstOperand();
+    const tempSecondOperand = this.tempStorage.getTempStoreForSecondOperand(); 
+    const secondOperand = tempSecondOperand ? tempSecondOperand : +this.display.getDisplayValue();
+
+    switch(this.pastOperation){
+      case operations.PLUS: 
+          resultOperation = this.sum(firstOperand, secondOperand);
+          break;
+    }
+
+    this.display.setDisplayValue(resultOperation);
+
+    this.tempStorage.setTempStoreForFirstOperand(resultOperation);
+    this.tempStorage.setTempStoreForSecondOperand(secondOperand);
+  };
+
   insert = event => {
-    this.number = event.target.textContent;
-    if (!this.newNumber) {
-      return () => {
-        this.newNumber = true;
-        this.display.value = this.number;
-      };
+    const number = Number(event.target.textContent);
+    
+    if (isNaN(number)){
+        return;
     }
-    if (!this.display.value === '0') {
-      return () => {
-        this.display.value = this.number;
-      };
+
+    if (this.display.getDisplayValue() === '0') {
+        this.display.setDisplayValue(number);
+        return;
     }
+
+    if (this.currentOperation !== '') {
+      this.display.setDisplayValue('');
+      this.currentOperation = '';
+    } 
+
+    const concatResult = this.display.getDisplayValue() + number;
+    this.display.setDisplayValue(concatResult);
   };
 
-  calculation = event => {
-    let operation = event.target.textContent;
-    let localOperation = +this.disp.display.value;
-    let localHidden = +this.hid.hidden.value;
-    let localSign = this.hid2.hidden2.value;
-    let localArchive = this.arh.archive.value.split(/[\+\*\-\/]/);
-    let round = 0;
-
-    if (this.newNumber && this.pendingOperation === '=') {
-      if (localSign.search(/[\+\*\/\-]/) !== '-1' && operation !== '=') {
-        localSign = operation;
-        this.hid2.hidden2.value = localSign;
-      } else {
-        this.CurrentNumber = eval(this.CurrentNumber + localSign + localHidden);
-      }
-    } else if (
-      this.newNumber &&
-      this.pendingOperation !== '=' &&
-      operation === '='
-    ) {
-      this.disp.display.value += localOperation;
-    } else if (this.newNumber && this.pendingOperation !== '=') {
-      this.disp.display.value = this.CurrentNumber;
-      this.hid.hidden.value = this.CurrentNumber;
-    } else {
-      this.newNumber = true;
-      switch (this.pendingOperation) {
-        case '+':
-          this.CurrentNumber = this.CurrentNumber + +localOperation;
-          this.hid2.hidden2.value = this.pendingOperation;
-          this.hid.hidden.value = localOperation;
-          break;
-        case '×':
-          this.CurrentNumber = this.CurrentNumber * +localOperation;
-          this.hid2.hidden2.value = '*';
-          this.hid.hidden.value = localOperation;
-          break;
-        case '÷':
-          this.CurrentNumber = this.CurrentNumber / +localOperation;
-          this.hid2.hidden2.value = '/';
-          this.hid.hidden.value = localOperation;
-          break;
-        case '-':
-          this.CurrentNumber = this.CurrentNumber - +localOperation;
-          this.hid2.hidden2.value = this.pendingOperation;
-          this.hid.hidden.value = localOperation;
-          break;
-        case 'x n':
-          this.CurrentNumber = Math.pow(this.CurrentNumber, localOperation);
-          break;
-        case '':
-          this.CurrentNumber = localOperation;
-      }
-    }
-
-    this.pendingOperation = operation;
-    round = +this.CurrentNumber;
-    this.disp.display.value = +round.toFixed(2);
-    if (this.pendingOperation !== '=') {
-      if (
-        localArchive[0] === this.disp.display.value ||
-        localArchive[localArchive.length - 2] === this.disp.display.value
-      ) {
-        this.arh.archive.value = this.arh.archive.value;
-      } else this.arh.archive.value += localOperation + this.pendingOperation;
-    } else {
-      this.arh.archive.value = '';
-      this.disp.display.value += localOperation;
-    }
+  operation = ({target}) => {
+    this.currentOperation = target.textContent;
+    this.pastOperation = this.currentOperation;
+    this.tempStorage.setTempStoreForFirstOperand(this.display.getDisplayValue());
   };
 
-  clean = event => {
-    if (event.target.textContent === 'C') {
-      this.disp.display.value = '0';
-      this.arh.archive.value = '';
-      this.hid.hidden.value = '';
-      this.CurrentNumber = 0;
-      this.pendingOperation = '';
-    } else if (event.target.textContent === 'CE') {
-      this.disp.display.value = '0';
-    } else {
-      if (this.disp.display.value.slice(0, -1) === '') {
-        this.disp.display.value = '0';
-      } else this.disp.display.value = this.disp.display.value.slice(0, -1);
+  sum(first, second){
+    return first + second;
+  }
+
+  divide(first, second){
+    return first / second;
+  }
+
+  multyply(first, second){
+    return first * second;
+  }
+
+  subtract(first, second){
+    return first - second;
+  }
+
+  pow(first, second){
+    return Math.pow(first, second);
+  }
+
+  clean = ({target}) => {
+    const {textContent} = target;
+
+    this.currentOperation = '';
+    this.pastOperation = '';
+
+    const displayText = this.display.getDisplayValue();
+
+    if(displayText === '0'){
+      return;
     }
+
+    if(textContent === cleaningButtons.REMOVE_LAST_SYMBOL){
+      const resultText = displayText.length > 1 ?  displayText.slice(0, -1) : 0;
+
+      this.display.setDisplayValue(resultText);
+      return;
+    }
+    this.display.setDisplayValue(0);
+
   };
 
   change = () => {
-    if (this.disp.display.value > '0') {
-      this.disp.display.value = -this.disp.display.value;
-      this.hid.hidden.value = this.disp.display.value;
+    if (this.display.display.value > '0') {
+      this.display.display.value = -this.display.display.value;
+      this.hid.hidden.value = this.display.display.value;
     } else {
-      this.disp.display.value = -this.disp.display.value;
-      this.hid.hidden.value = this.disp.display.value;
+      this.display.display.value = -this.display.display.value;
+      this.hid.hidden.value = this.display.display.value;
     }
   };
 
   fraction = () => {
     let round = 0;
 
-    this.arh.archive.value = '1' + '/' + '(' + this.disp.display.value + ')';
+    this.arh.archive.value = '1' + '/' + '(' + this.display.display.value + ')';
 
-    this.disp.display.value = 1 / this.disp.display.value;
+    this.display.display.value = 1 / this.display.display.value;
 
-    round = +this.disp.display.value;
+    round = +this.display.display.value;
 
-    this.disp.display.value = +round.toFixed(3);
+    this.display.display.value = +round.toFixed(3);
   };
 
   sqrt = () => {
     let round = 0;
-    this.arh.archive.value = 'SQRT' + '(' + this.disp.display.value + ')';
+    this.arh.archive.value = 'SQRT' + '(' + this.display.display.value + ')';
 
-    this.disp.display.value = Math.sqrt(this.disp.display.value);
+    this.display.display.value = Math.sqrt(this.display.display.value);
 
-    round = +this.disp.display.value;
+    round = +this.display.display.value;
 
-    this.disp.display.value = +round.toFixed(2);
+    this.display.display.value = +round.toFixed(2);
   };
 
   percent = () => {
@@ -182,24 +166,24 @@ class Calculator {
 
     let g = this.arh.archive.value.match(/[\+\×\-\÷]/);
 
-    this.disp.display.value = (z[0] * this.disp.display.value) / 100;
+    this.display.display.value = (z[0] * this.display.display.value) / 100;
 
-    this.arh.archive.value = z[0] + g[0] + this.disp.display.value;
-    this.hid.hidden.value = this.disp.display.value;
+    this.arh.archive.value = z[0] + g[0] + this.display.display.value;
+    this.hid.hidden.value = this.display.display.value;
   };
 
   comma = () => {
-    let localComma = this.disp.display.value;
+    let localComma = this.display.display.value;
 
-    if (this.newNumber) {
+    if (this.isSecondOperand) {
       localComma = '0.';
-      this.newNumber = false;
+      this.isSecondOperand = false;
     } else {
       if (localComma.indexOf('.') === -1) {
         localComma += '.';
       }
     }
-    this.disp.display.value = localComma;
+    this.display.display.value = localComma;
   };
 
   motion() {
