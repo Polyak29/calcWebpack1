@@ -1,14 +1,13 @@
 import Memory from './Memory';
 import Display from './display';
-import OnOff from './startCalc';
 import LocalStor from './localStorage';
-import {operations, cleaningButtons} from './const'
+import { operations, cleaningButtons } from './const';
 import TempStorage from './tempStorage';
 
-// new Memory();
-new OnOff();
+
 class Calculator {
   constructor() {
+    this.memory = new Memory();
     this.display = new Display();
     this.tempStorage = new TempStorage();
     this.resultOperation = 0;
@@ -17,17 +16,12 @@ class Calculator {
     this.currentOperation = '';
     this.myStorage = localStorage;
     this.motion();
+    this.resize();
 
-    this.listenClass('calculator__keyboard-button--number', this.insert);
-    this.listenClass('operationButton', this.operation);
-    this.listenClass('cleanButton', this.clean);
-    this.listenClass('resultButton', this.calculateResult);
-
-    this.listenId('sqrt', this.sqrt);
-    this.listenId('fraction', this.fraction);
-    this.listenId('change', this.change);
-    this.listenId('percent', this.percent);
-    this.listenId('comma', this.comma);
+    this.listenClass('js_insertSymbol', this.insert);
+    this.listenClass('js_operationButton', this.operation);
+    this.listenClass('js_cleanButton', this.clean);
+    this.listenClass('js_resultButton', this.calculateResult);
   }
 
   listenClass = (classSelector, nameMethod) => {
@@ -36,141 +30,133 @@ class Calculator {
     });
   };
 
-  listenId = (IdSelector, nameMethod) => {
-    document.getElementById(IdSelector).addEventListener('click', nameMethod);
-  };
 
-  calculateResult = () => {
+  calculateResult = ({ target }) => {
+
     let resultOperation = 0;
-    
-    const firstOperand = this.tempStorage.getTempStoreForFirstOperand();
-    const tempSecondOperand = this.tempStorage.getTempStoreForSecondOperand(); 
-    const secondOperand = tempSecondOperand ? tempSecondOperand : +this.display.getDisplayValue();
 
-    switch(this.pastOperation){
-      case operations.PLUS: 
-          resultOperation = this.sum(firstOperand, secondOperand);
-          break;
+    const firstOperand = this.tempStorage.getTempStoreForFirstOperand();
+    const tempSecondOperand = this.tempStorage.getTempStoreForSecondOperand();
+    const secondOperand = tempSecondOperand
+      ? tempSecondOperand
+      : +this.display.getDisplayValue();
+
+    if (target.value === operations.PERCENT) {
+      this.display.setDisplayValue(this.percent(firstOperand, secondOperand));
+      return;
+    }
+
+    switch (this.pastOperation) {
+      case operations.PLUS:
+        resultOperation = this.sum(firstOperand, secondOperand);
+        break;
+      case operations.MINUS:
+        resultOperation = this.subtract(firstOperand, secondOperand);
+        break;
+      case operations.MULTIPLY:
+        resultOperation = this.multyply(firstOperand, secondOperand);
+        break;
+      case operations.DIVIDE:
+        resultOperation = this.divide(firstOperand, secondOperand);
+        break;
+      case operations.POW:
+        resultOperation = this.pow(firstOperand, secondOperand);
+        break;
+
     }
 
     this.display.setDisplayValue(resultOperation);
-
     this.tempStorage.setTempStoreForFirstOperand(resultOperation);
     this.tempStorage.setTempStoreForSecondOperand(secondOperand);
   };
 
-  insert = event => {
-    const number = Number(event.target.textContent);
-    
-    if (isNaN(number)){
-        return;
+  insert = ({ target }) => {
+    let localVariabel = this.display.getDisplayValue();
+
+    if (target.value === operations.COMMA) {
+      if (localVariabel.indexOf(operations.COMMA) === -1) {
+        this.display.setDisplayValue(localVariabel + operations.COMMA);
+      }
+      return;
+    }
+
+    const number = Number(target.value);
+
+    if (isNaN(number)) {
+      return;
     }
 
     if (this.display.getDisplayValue() === '0') {
-        this.display.setDisplayValue(number);
-        return;
+      this.display.setDisplayValue(number);
+      return;
     }
 
     if (this.currentOperation !== '') {
       this.display.setDisplayValue('');
       this.currentOperation = '';
-    } 
+    }
 
     const concatResult = this.display.getDisplayValue() + number;
     this.display.setDisplayValue(concatResult);
   };
 
-  operation = ({target}) => {
-    this.currentOperation = target.textContent;
+  operation = ({ target }) => {
+    switch (target.value) {
+      case operations.CHANGE:
+        this.change(this.display.getDisplayValue());
+        break;
+      case operations.FRAC:
+        this.fraction(this.display.getDisplayValue());
+        break;
+      case operations.SQRT:
+        this.display.setDisplayValue(this.sqrt());
+    }
+
+
+    this.currentOperation = target.value;
     this.pastOperation = this.currentOperation;
     this.tempStorage.setTempStoreForFirstOperand(this.display.getDisplayValue());
+    this.tempStorage.setTempStoreForSecondOperand('');
   };
 
-  sum(first, second){
+  sum(first, second) {
     return first + second;
   }
 
-  divide(first, second){
+  divide(first, second) {
     return first / second;
   }
 
-  multyply(first, second){
+  multyply(first, second) {
     return first * second;
   }
 
-  subtract(first, second){
+  subtract(first, second) {
     return first - second;
   }
 
-  pow(first, second){
+  pow(first, second) {
     return Math.pow(first, second);
   }
 
-  clean = ({target}) => {
-    const {textContent} = target;
+  change(first) {
+    this.display.setDisplayValue(first * -1);
+  }
 
-    this.currentOperation = '';
-    this.pastOperation = '';
+  fraction(first) {
+    return this.display.setDisplayValue(1 / first);
+  }
 
-    const displayText = this.display.getDisplayValue();
+  sqrt() {
+    return Math.sqrt(this.display.getDisplayValue());
+  }
 
-    if(displayText === '0'){
-      return;
-    }
+  percent(first, second) {
 
-    if(textContent === cleaningButtons.REMOVE_LAST_SYMBOL){
-      const resultText = displayText.length > 1 ?  displayText.slice(0, -1) : 0;
+    return (first / 100) * second;
 
-      this.display.setDisplayValue(resultText);
-      return;
-    }
-    this.display.setDisplayValue(0);
 
-  };
-
-  change = () => {
-    if (this.display.display.value > '0') {
-      this.display.display.value = -this.display.display.value;
-      this.hid.hidden.value = this.display.display.value;
-    } else {
-      this.display.display.value = -this.display.display.value;
-      this.hid.hidden.value = this.display.display.value;
-    }
-  };
-
-  fraction = () => {
-    let round = 0;
-
-    this.arh.archive.value = '1' + '/' + '(' + this.display.display.value + ')';
-
-    this.display.display.value = 1 / this.display.display.value;
-
-    round = +this.display.display.value;
-
-    this.display.display.value = +round.toFixed(3);
-  };
-
-  sqrt = () => {
-    let round = 0;
-    this.arh.archive.value = 'SQRT' + '(' + this.display.display.value + ')';
-
-    this.display.display.value = Math.sqrt(this.display.display.value);
-
-    round = +this.display.display.value;
-
-    this.display.display.value = +round.toFixed(2);
-  };
-
-  percent = () => {
-    let z = this.arh.archive.value.split(/[\+\×\-\÷]/);
-
-    let g = this.arh.archive.value.match(/[\+\×\-\÷]/);
-
-    this.display.display.value = (z[0] * this.display.display.value) / 100;
-
-    this.arh.archive.value = z[0] + g[0] + this.display.display.value;
-    this.hid.hidden.value = this.display.display.value;
-  };
+  }
 
   comma = () => {
     let localComma = this.display.display.value;
@@ -184,6 +170,33 @@ class Calculator {
       }
     }
     this.display.display.value = localComma;
+  };
+
+  clean = ({ target }) => {
+    const { value } = target;
+
+    this.currentOperation = '';
+    this.pastOperation = '';
+
+    const displayText = this.display.getDisplayValue();
+
+    if (displayText === '0') {
+      return;
+    }
+
+    if (value === cleaningButtons.REMOVE_LAST_SYMBOL) {
+      const resultText = displayText.length > 1 ? displayText.slice(0, -1) : 0;
+
+      this.display.setDisplayValue(resultText);
+      return;
+    }
+
+    if (value === cleaningButtons.CLEAN) {
+      this.display.getDisplayValue(0);
+      this.tempStorage.getTempStoreForFirstOperand('');
+      this.tempStorage.getTempStoreForSecondOperand('');
+    }
+    this.display.setDisplayValue(0);
   };
 
   motion() {
@@ -304,8 +317,8 @@ class Calculator {
       return elem.closest('body');
     };
 
-    this.onDragEnd = function(dragObject, dropElem) {};
-    this.onDragCancel = function(dragObject) {};
+    this.onDragEnd = function (dragObject, dropElem) { };
+    this.onDragCancel = function (dragObject) { };
 
     let getCoords = elem => {
       let box = elem.getBoundingClientRect();
@@ -315,6 +328,49 @@ class Calculator {
         left: box.left + pageXOffset
       };
     };
+  }
+  resize() {
+    let rollUp = document.querySelector('.hat__buttons-rollUp'),
+      expand = document.querySelector('.hat__buttons-expand'),
+      close = document.querySelector('.hat__buttons-close'),
+      openCalc = document.querySelector('.openCalc'),
+      calc = document.querySelector('.calculator'),
+      minimize = {
+        keyboard: document.querySelector('.calculator__keyboard'),
+        type2: document.querySelector('.types'),
+        input: document.querySelector('.calculator__display-input'),
+        memory: document.querySelector('.calculator__display-memory')
+      };
+
+    openCalc.addEventListener('click', () => {
+      calc.style.display = 'flex';
+      openCalc.style.display = 'none';
+    });
+
+    close.addEventListener('click', () => {
+      calc.style.position = 'absolute';
+      calc.style.top = '4.5rem';
+      calc.style.right = '1rem';
+      calc.style.left = 'auto';
+      calc.style.display = 'none';
+      openCalc.style.display = 'flex';
+    });
+
+    rollUp.addEventListener('click', () => {
+      Object.entries(minimize).forEach(([key, value]) => {
+        value.style.display = 'none';
+      });
+      expand.classList.toggle('disabled');
+      rollUp.classList.toggle('disabled');
+    });
+
+    expand.addEventListener('click', () => {
+      Object.entries(minimize).forEach(([key, value]) => {
+        value.style.display = 'flex';
+      });
+      expand.classList.toggle('disabled');
+      rollUp.classList.toggle('disabled');
+    });
   }
 }
 
