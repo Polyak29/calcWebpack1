@@ -1,7 +1,7 @@
 import Memory from './Memory';
 import Display from './display';
 import LocalStor from './localStorage';
-import { operations, cleaningButtons } from './const';
+import { operations, cleaningButtons, displayVisibility, minimize, resizeCalc } from './const';
 import TempStorage from './tempStorage';
 
 
@@ -16,12 +16,15 @@ class Calculator {
     this.currentOperation = '';
     this.myStorage = localStorage;
     this.motion();
-    this.resize();
 
     this.listenClass('js_insertSymbol', this.insert);
     this.listenClass('js_operationButton', this.operation);
     this.listenClass('js_cleanButton', this.clean);
     this.listenClass('js_resultButton', this.calculateResult);
+    this.listenClass('hat__buttons-rollUp', this.rollUp);
+    this.listenClass('hat__buttons-expand', this.expand);
+    this.listenClass('hat__buttons-close', this.closeCalc);
+    this.listenClass('openCalc', this.openCalc);
   }
 
   listenClass = (classSelector, nameMethod) => {
@@ -80,7 +83,8 @@ class Calculator {
       return;
     }
 
-    const number = Number(target.value);
+
+    const number = parseFloat(target.value);
 
     if (isNaN(number)) {
       return;
@@ -101,22 +105,32 @@ class Calculator {
   };
 
   operation = ({ target }) => {
+
+
     switch (target.value) {
-      case operations.CHANGE:
-        this.change(this.display.getDisplayValue());
-        break;
       case operations.FRAC:
         this.fraction(this.display.getDisplayValue());
         break;
       case operations.SQRT:
         this.display.setDisplayValue(this.sqrt());
+        break;
+      case operations.CHANGE:
+        if (this.pastOperation === '') {
+          this.pastOperation = target.value;
+          this.change(this.display.getDisplayValue());
+          return;
+        } else if (this.tempStorage.getTempStoreForSecondOperand() !== '') {
+          return this.change(this.display.getDisplayValue());
+        }
+        return this.change(this.tempStorage.getTempStoreForFirstOperand());
     }
-
 
     this.currentOperation = target.value;
     this.pastOperation = this.currentOperation;
     this.tempStorage.setTempStoreForFirstOperand(this.display.getDisplayValue());
     this.tempStorage.setTempStoreForSecondOperand('');
+
+
   };
 
   sum(first, second) {
@@ -141,6 +155,7 @@ class Calculator {
 
   change(first) {
     this.display.setDisplayValue(first * -1);
+    this.tempStorage.setTempStoreForFirstOperand(first * -1);
   }
 
   fraction(first) {
@@ -158,26 +173,13 @@ class Calculator {
 
   }
 
-  comma = () => {
-    let localComma = this.display.display.value;
-
-    if (this.isSecondOperand) {
-      localComma = '0.';
-      this.isSecondOperand = false;
-    } else {
-      if (localComma.indexOf('.') === -1) {
-        localComma += '.';
-      }
-    }
-    this.display.display.value = localComma;
-  };
-
   clean = ({ target }) => {
     const { value } = target;
 
     this.currentOperation = '';
     this.pastOperation = '';
-
+    this.tempStorage.setTempStoreForFirstOperand('');
+    this.tempStorage.setTempStoreForSecondOperand('');
     const displayText = this.display.getDisplayValue();
 
     if (displayText === '0') {
@@ -329,49 +331,39 @@ class Calculator {
       };
     };
   }
-  resize() {
-    let rollUp = document.querySelector('.hat__buttons-rollUp'),
-      expand = document.querySelector('.hat__buttons-expand'),
-      close = document.querySelector('.hat__buttons-close'),
-      openCalc = document.querySelector('.openCalc'),
-      calc = document.querySelector('.calculator'),
-      minimize = {
-        keyboard: document.querySelector('.calculator__keyboard'),
-        type2: document.querySelector('.types'),
-        input: document.querySelector('.calculator__display-input'),
-        memory: document.querySelector('.calculator__display-memory')
-      };
 
-    openCalc.addEventListener('click', () => {
-      calc.style.display = 'flex';
-      openCalc.style.display = 'none';
-    });
 
-    close.addEventListener('click', () => {
-      calc.style.position = 'absolute';
-      calc.style.top = '4.5rem';
-      calc.style.right = '1rem';
-      calc.style.left = 'auto';
-      calc.style.display = 'none';
-      openCalc.style.display = 'flex';
-    });
-
-    rollUp.addEventListener('click', () => {
-      Object.entries(minimize).forEach(([key, value]) => {
-        value.style.display = 'none';
-      });
-      expand.classList.toggle('disabled');
-      rollUp.classList.toggle('disabled');
-    });
-
-    expand.addEventListener('click', () => {
-      Object.entries(minimize).forEach(([key, value]) => {
-        value.style.display = 'flex';
-      });
-      expand.classList.toggle('disabled');
-      rollUp.classList.toggle('disabled');
-    });
+  openCalc() {
+    resizeCalc.CALC.style.display = displayVisibility.FLEX;
+    resizeCalc.OPEN.style.display = displayVisibility.NONE;
   }
+
+  closeCalc() {
+    resizeCalc.CALC.style.position = 'absolute';
+    resizeCalc.CALC.style.top = '4.5rem';
+    resizeCalc.CALC.style.right = '1rem';
+    resizeCalc.CALC.style.left = 'auto';
+    resizeCalc.CALC.style.display = displayVisibility.NONE;
+    resizeCalc.OPEN.style.display = displayVisibility.FLEX;
+  }
+
+
+  expand() {
+    Object.entries(minimize).forEach(([key, value]) => {
+      value.style.display = displayVisibility.FLEX;
+    });
+    resizeCalc.EXPAND.classList.toggle('disabled');
+    resizeCalc.ROLLUP.classList.toggle('disabled');
+  }
+
+  rollUp() {
+    Object.entries(minimize).forEach(([key, value]) => {
+      value.style.display = displayVisibility.NONE;
+    });
+    resizeCalc.EXPAND.classList.toggle('disabled');
+    resizeCalc.ROLLUP.classList.toggle('disabled');
+  }
+
 }
 
 export default Calculator;

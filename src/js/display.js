@@ -2,13 +2,21 @@ class Display {
     constructor() {
         this._display = document.querySelector('.calculator__display-input--size');
         this.archiveValue = document.querySelector('.calculator__display-input--shadow');
-        this.memory = document.querySelector('.calculator__display-input--memory');
+        this._memory = document.querySelector('.calculator__display-input--memory');
     }
-    setDisplayValue(newValue){
+    setDisplayValue(newValue) {
         this._display.value = newValue;
     }
     getDisplayValue() {
         return this._display.value;
+    }
+
+    setMemoryValue(newValue) {
+        this._memory.value = newValue;
+    }
+
+    getMemoryValue() {
+        return this._memory.value;
     }
 
 }
