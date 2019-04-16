@@ -83,7 +83,6 @@ class Calculator {
       return;
     }
 
-
     const number = parseFloat(target.value);
 
     if (isNaN(number)) {
@@ -105,7 +104,6 @@ class Calculator {
   };
 
   operation = ({ target }) => {
-
 
     switch (target.value) {
       case operations.FRAC:
@@ -129,7 +127,6 @@ class Calculator {
     this.pastOperation = this.currentOperation;
     this.tempStorage.setTempStoreForFirstOperand(this.display.getDisplayValue());
     this.tempStorage.setTempStoreForSecondOperand('');
-
 
   };
 
