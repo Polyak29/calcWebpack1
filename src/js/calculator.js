@@ -1,4 +1,4 @@
-import Memory from './Memory';
+import Memory from './memory';
 import Display from './display';
 import LocalStor from './localStorage';
 import { operations, cleaningButtons, displayVisibility, minimize, resizeCalc } from './const';
@@ -363,6 +363,105 @@ class Calculator {
     resizeCalc.EXPAND.classList.toggle('disabled');
     resizeCalc.ROLLUP.classList.toggle('disabled');
   }
+
+  // get template() {
+  //   return `
+  //     <div class="calculator">
+  //       ${this.display.template}
+  //       <div class="calculator__keyboard">
+  //         <div class="calculator__keyboard-container">
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_resultButton" value="percent">%</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_operationButton" value="sqrt">√</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_operationButton" value="^">x <sup>n</sup></button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_operationButton"
+  //               value="fraction"><sup>1</sup>/x</button>
+  //           </div>
+  //         </div>
+  //         <div class="calculator__keyboard-container">
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_cleanButton" value="CE">CE</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_cleanButton" value="C">C</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_cleanButton" value="removeLastNumber">⇐</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_operationButton" value="/">÷</button>
+  //           </div>
+  //         </div>
+  //         <div class="calculator__keyboard-container">
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="7">7</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="8">8</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="9">9</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_operationButton" value="*">×</button>
+  //           </div>
+  //         </div>
+  //         <div class="calculator__keyboard-container">
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="4">4</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="5">5</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="6">6</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_operationButton" value="-">-</button>
+  //           </div>
+  //         </div>
+  //         <div class="calculator__keyboard-container">
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="1">1</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="2">2</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="3">3</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_operationButton" value="+">+</button>
+  //           </div>
+  //         </div>
+  //         <div class="calculator__keyboard-container">
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_operationButton" value="change">±</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="0">0</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_insertSymbol" value=".">,</button>
+  //           </div>
+  //           <div class="calculator__keyboard-button">
+  //             <button class="calculator__keyboard-button--operation js_resultButton" value="=">=</button>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  // 	`;
+  // }
+
+  // init(props) {
+  //   props.innerHTML = this.template;
+  // }
 
 }
 

@@ -1,2 +1,5 @@
-import Calculator from './calculator'
+import Calculator from './calculator';
 new Calculator();
+
+// let calculator = new Calculator();
+

@@ -15,7 +15,7 @@ export const operations = {
 export const cleaningButtons = {
   CLEAN_ELEMENT: 'CE',
   CLEAN: 'C',
-  REMOVE_LAST_SYMBOL: '⇐'
+  REMOVE_LAST_SYMBOL: 'removeLastNumber'
 };
 
 export const memoryButtons = {

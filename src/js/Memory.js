@@ -36,7 +36,7 @@ class Memory {
       case 'M':
         break;
     }
-  };
+  }
 }
 
 export default Memory;
