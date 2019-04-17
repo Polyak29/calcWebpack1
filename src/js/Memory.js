@@ -3,7 +3,8 @@ import { memoryButtons } from './const';
 
 class Memory {
   constructor() {
-    this.display = new Display(this.display);
+    this.display = new Display();
+    this.localTempDisplay = 0;
     [
       ...document.getElementsByClassName('memory-calculator__operations--size')
     ].forEach(el => {
@@ -12,28 +13,28 @@ class Memory {
   }
 
   workMemory = ({ target }) => {
+    let display = +this.display.value;
     switch (target.value) {
-      case 'MC':
-        this.display.setMemoryValue('');
+      case memoryButtons.CLEAR:
+        this.display.setMemory = '';
         break;
 
-      case 'MR':
-        this.display.setDisplayValue(this.display.getMemoryValue());
+      case memoryButtons.READ:
+        this.display.setValue = this.localTempDisplay;
         break;
 
-      case 'M+':
-        this.display.setMemoryValue(this.display.getMemoryValue() + this.display.getDisplayValue());
+      case memoryButtons.PLUS:
+      console.log(display);
+        this.display.setMemory = this.localTempDisplay + display;
         break;
 
-      case 'M-':
-        this.display.setMemoryValue(this.display.getMemoryValue() - this.display.getDisplayValue());
+      case memoryButtons.SUBSTRUCT:
+        this.display.setMemory = this.localTempDisplay + display;
         break;
 
-      case memoryButtons.MEMORY_SAVE:
-        this.display.setMemoryValue(this.display.getDisplayValue());
-        break;
-
-      case 'M':
+      case memoryButtons.SAVE:
+        this.localTempDisplay = Number(this.display.value);
+        this.display.setMemory = this.localTempDisplay;
         break;
     }
   }

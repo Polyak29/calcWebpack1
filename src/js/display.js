@@ -4,21 +4,22 @@ class Display {
         this.archiveValue = document.querySelector('.calculator__display-input--shadow');
         this._memory = document.querySelector('.calculator__display-input--memory');
     }
-    setDisplayValue(newValue) {
-        this._display.value = newValue;
-    }
-    getDisplayValue() {
-        return this._display.value;
+
+    set setMemory(value) {
+        this._memory.value = value;
     }
 
-    setMemoryValue(newValue) {
-        this._memory.value = newValue;
+    get memory() {
+        return +this._memory.valuye;
     }
 
-    getMemoryValue() {
-        return this._memory.value;
+    set setValue(value) {
+        this._display.value = value;
     }
 
+    get value() {
+        return  this._display.value;
+    }
     // get template() {
     //     return `
     //     <div class="calculator__display">

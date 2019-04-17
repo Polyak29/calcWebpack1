@@ -4,17 +4,15 @@ import LocalStor from './localStorage';
 import { operations, cleaningButtons, displayVisibility, minimize, resizeCalc } from './const';
 import TempStorage from './tempStorage';
 
-
-class Calculator {
+class Calculator extends TempStorage {
   constructor() {
+    super();
     this.memory = new Memory();
     this.display = new Display();
-    this.tempStorage = new TempStorage();
-    this.resultOperation = 0;
     this.isSecondOperand = false;
     this.pastOperation = '';
     this.currentOperation = '';
-    this.myStorage = localStorage;
+    this.resultOperation = 0;
     this.motion();
 
     this.listenClass('js_insertSymbol', this.insert);
@@ -36,52 +34,51 @@ class Calculator {
 
   calculateResult = ({ target }) => {
 
-    let resultOperation = 0;
-
-    const firstOperand = this.tempStorage.getTempStoreForFirstOperand();
-    const tempSecondOperand = this.tempStorage.getTempStoreForSecondOperand();
+    const firstOperand = this.firstOperand;
+    const tempSecondOperand = this.secondOperand;
     const secondOperand = tempSecondOperand
       ? tempSecondOperand
-      : +this.display.getDisplayValue();
+      : +this.display.value;
 
     if (target.value === operations.PERCENT) {
-      this.display.setDisplayValue(this.percent(firstOperand, secondOperand));
+      this.display.setValue = this.percent(firstOperand, secondOperand);
       return;
     }
 
     switch (this.pastOperation) {
       case operations.PLUS:
-        resultOperation = this.sum(firstOperand, secondOperand);
+        this.resultOperation = this.sum(firstOperand, secondOperand);
         break;
       case operations.MINUS:
-        resultOperation = this.subtract(firstOperand, secondOperand);
+        this.resultOperation = this.subtract(firstOperand, secondOperand);
         break;
       case operations.MULTIPLY:
-        resultOperation = this.multyply(firstOperand, secondOperand);
+        this.resultOperation = this.multyply(firstOperand, secondOperand);
         break;
       case operations.DIVIDE:
-        resultOperation = this.divide(firstOperand, secondOperand);
+        this.resultOperation = this.divide(firstOperand, secondOperand);
         break;
       case operations.POW:
-        resultOperation = this.pow(firstOperand, secondOperand);
+        this.resultOperation = this.pow(firstOperand, secondOperand);
         break;
 
     }
 
-    this.display.setDisplayValue(resultOperation);
-    this.tempStorage.setTempStoreForFirstOperand(resultOperation);
-    this.tempStorage.setTempStoreForSecondOperand(secondOperand);
+    this.display.setValue = this.resultOperation;
+    this.setFirstOperand = this.resultOperation;
+    this.setSecondOperand = secondOperand;
   };
 
   insert = ({ target }) => {
-    let localVariabel = this.display.getDisplayValue();
+    this.localVariabel = this.display.value;
 
     if (target.value === operations.COMMA) {
-      if (localVariabel.indexOf(operations.COMMA) === -1) {
-        this.display.setDisplayValue(localVariabel + operations.COMMA);
+      if (this.localVariabel.indexOf(operations.COMMA) === -1) {
+        this.display.setValue = this.localVariabel + operations.COMMA;
       }
       return;
     }
+
 
     const number = parseFloat(target.value);
 
@@ -89,44 +86,47 @@ class Calculator {
       return;
     }
 
-    if (this.display.getDisplayValue() === '0') {
-      this.display.setDisplayValue(number);
+    if (this.display.value === '0') {
+      this.display.setValue = number;
       return;
     }
 
     if (this.currentOperation !== '') {
-      this.display.setDisplayValue('');
+      this.display.setValue = '';
       this.currentOperation = '';
     }
 
-    const concatResult = this.display.getDisplayValue() + number;
-    this.display.setDisplayValue(concatResult);
+    const concatResult = this.display.value + number;
+    this.display.setValue = concatResult;
   };
 
   operation = ({ target }) => {
 
     switch (target.value) {
       case operations.FRAC:
-        this.fraction(this.display.getDisplayValue());
+        this.fraction(this.display.value);
         break;
       case operations.SQRT:
-        this.display.setDisplayValue(this.sqrt());
-        break;
+        this.display.setValue = this.sqrt();
+        this.currentOperation = '';
+        return;
       case operations.CHANGE:
+        this.localVariabel = this.display.value;
         if (this.pastOperation === '') {
           this.pastOperation = target.value;
-          this.change(this.display.getDisplayValue());
+          this.change(this.localVariabel);
           return;
-        } else if (this.tempStorage.getTempStoreForSecondOperand() !== '') {
-          return this.change(this.display.getDisplayValue());
+        } else if (this.secondOperand !== '') {
+          return this.change(this.display.value);
         }
-        return this.change(this.tempStorage.getTempStoreForFirstOperand());
+        return this.change(this.firstOperand);
     }
 
     this.currentOperation = target.value;
     this.pastOperation = this.currentOperation;
-    this.tempStorage.setTempStoreForFirstOperand(this.display.getDisplayValue());
-    this.tempStorage.setTempStoreForSecondOperand('');
+    this.setFirstOperand = this.display.value;
+    this.setSecondOperand = '';
+
 
   };
 
@@ -151,17 +151,18 @@ class Calculator {
   }
 
   change(first) {
-    this.display.setDisplayValue(first * -1);
-    this.tempStorage.setTempStoreForFirstOperand(first * -1);
+    this.display.setValue = first * -1;
+    this.setFirstOperand = first * -1;
   }
 
   fraction(first) {
-    return this.display.setDisplayValue(1 / first);
+    return this.display.setValue = 1 / first;
   }
 
   sqrt() {
-    return Math.sqrt(this.display.getDisplayValue());
+    return Math.sqrt(this.display.value);
   }
+    
 
   percent(first, second) {
 
@@ -172,30 +173,35 @@ class Calculator {
 
   clean = ({ target }) => {
     const { value } = target;
-
-    this.currentOperation = '';
-    this.pastOperation = '';
-    this.tempStorage.setTempStoreForFirstOperand('');
-    this.tempStorage.setTempStoreForSecondOperand('');
-    const displayText = this.display.getDisplayValue();
-
-    if (displayText === '0') {
-      return;
-    }
+    let resultText = '';
+    const displayText = this.display.value;
 
     if (value === cleaningButtons.REMOVE_LAST_SYMBOL) {
-      const resultText = displayText.length > 1 ? displayText.slice(0, -1) : 0;
+        if (this.resultOperation !== 0){
+          return;
+        }
 
-      this.display.setDisplayValue(resultText);
-      return;
-    }
+        resultText = displayText.length > 1 ? displayText.slice(0, -1) : 0;
+        this.display.setValue = resultText;
+        return;
+      }
+        this.currentOperation = '';
+        this.pastOperation = '';
+        this.setFirstOperand = '';
+        this.setSecondOperand = '';
+        this.resultOperation = 0;
+        
+    
+        if (displayText === '0') {
+          return;
+        }
 
     if (value === cleaningButtons.CLEAN) {
-      this.display.getDisplayValue(0);
-      this.tempStorage.getTempStoreForFirstOperand('');
-      this.tempStorage.getTempStoreForSecondOperand('');
+      this.display.setValue = 0;
+      this.setFirstOperand = '';
+      this.setSecondOperand = '';
     }
-    this.display.setDisplayValue(0);
+    this.display.setValue = 0;
   };
 
   motion() {
@@ -360,6 +366,7 @@ class Calculator {
     resizeCalc.EXPAND.classList.toggle('disabled');
     resizeCalc.ROLLUP.classList.toggle('disabled');
   }
+  
 
   // get template() {
   //   return `

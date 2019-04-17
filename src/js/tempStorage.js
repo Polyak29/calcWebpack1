@@ -4,19 +4,19 @@ class TempStorage {
     this._tempStoreForSecondOperand = '';
   }
 
-  setTempStoreForFirstOperand(value) {
+  set setFirstOperand(value) {
     this._tempStoreForFirstOperand = +value;
   }
 
-  getTempStoreForFirstOperand() {
+  get firstOperand() {
     return +this._tempStoreForFirstOperand;
   }
 
-  setTempStoreForSecondOperand(value) {
+  set setSecondOperand(value) {
     this._tempStoreForSecondOperand = +value;
   }
 
-  getTempStoreForSecondOperand() {
+  get secondOperand() {
     return +this._tempStoreForSecondOperand;
   }
 }

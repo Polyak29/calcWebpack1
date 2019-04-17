@@ -19,12 +19,12 @@ export const cleaningButtons = {
 };
 
 export const memoryButtons = {
-  MEMORY_SAVE: 'MS',
-  MEMORY_CLEAR: 'MC',
-  MEMORY_PLUS: 'M+',
-  MEMORY_SUBSTRUCT: 'M-',
-  MEMORY_READ: 'MR',
-  MEMORY_LIST: 'M'
+  SAVE: 'MS',
+  CLEAR: 'MC',
+  PLUS: 'M+',
+  SUBSTRUCT: 'M-',
+  READ: 'MR',
+  LIST: 'M'
 };
 
 export const displayVisibility = {
