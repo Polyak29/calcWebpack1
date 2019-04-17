@@ -3,6 +3,7 @@ class Display {
         this._display = document.querySelector('.calculator__display-input--size');
         this.archiveValue = document.querySelector('.calculator__display-input--shadow');
         this._memory = document.querySelector('.calculator__display-input--memory');
+        this._value = 0;
     }
 
     set setMemory(value) {
@@ -13,13 +14,24 @@ class Display {
         return +this._memory.valuye;
     }
 
-    set setValue(value) {
-        this._display.value = value;
+    set value(value) {
+        this._display.value = this.numberParsing(value);
+        this._value = String(value);
     }
 
     get value() {
-        return  this._display.value;
+        return this._value;
     }
+
+    numberParsing = (variabel) =>{
+        let number = Number(variabel);
+        let parse = parseFloat(number.toFixed(8),5);
+        let string = String(parse);
+        let rank = string.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ');
+        return rank;
+      };
+    
+
     // get template() {
     //     return `
     //     <div class="calculator__display">

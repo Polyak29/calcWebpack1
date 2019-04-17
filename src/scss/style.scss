@@ -87,7 +87,7 @@ body{
                     &:hover {
                         cursor: pointer;
                     }
- }
+                }
             }  
         }
         
@@ -110,6 +110,7 @@ body{
             padding: 23px 7px;
             &--size{
                 border:none;
+                color:black;
                 height: 100%;
                 width: 100%;
                 text-align: right;

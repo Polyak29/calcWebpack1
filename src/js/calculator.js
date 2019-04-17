@@ -4,11 +4,17 @@ import LocalStor from './localStorage';
 import { operations, cleaningButtons, displayVisibility, minimize, resizeCalc } from './const';
 import TempStorage from './tempStorage';
 
+
+// window.onload = () =>{
+//   let returnObj = JSON.parse(localStorage.getItem("position"))
+// }
+
 class Calculator extends TempStorage {
   constructor() {
     super();
     this.memory = new Memory();
     this.display = new Display();
+    this.localStorage = new LocalStor();
     this.isSecondOperand = false;
     this.pastOperation = '';
     this.currentOperation = '';
@@ -41,7 +47,7 @@ class Calculator extends TempStorage {
       : +this.display.value;
 
     if (target.value === operations.PERCENT) {
-      this.display.setValue = this.percent(firstOperand, secondOperand);
+      this.display.value = this.percent(firstOperand, secondOperand);
       return;
     }
 
@@ -63,22 +69,27 @@ class Calculator extends TempStorage {
         break;
 
     }
-
-    this.display.setValue = this.resultOperation;
+    this.resultOperation = this.resultOperation.toFixed(4);
+    this.display.value = parseFloat(this.resultOperation, 9);
     this.setFirstOperand = this.resultOperation;
     this.setSecondOperand = secondOperand;
   };
 
   insert = ({ target }) => {
-    this.localVariabel = this.display.value;
+    this.localVariabel = String(this.display.value);
 
     if (target.value === operations.COMMA) {
-      if (this.localVariabel.indexOf(operations.COMMA) === -1) {
-        this.display.setValue = this.localVariabel + operations.COMMA;
+      if (this.currentOperation !== '') {
+        this.setDisplay.value = 0 + operations.COMMA;
+        return;
       }
-      return;
-    }
 
+      if (this.localVariabel.indexOf(operations.COMMA) === -1) {
+        this.display.value = this.localVariabel + operations.COMMA;
+        return;
+      }
+     
+    }
 
     const number = parseFloat(target.value);
 
@@ -86,18 +97,19 @@ class Calculator extends TempStorage {
       return;
     }
 
-    if (this.display.value === '0') {
-      this.display.setValue = number;
+    if (this.localVariabel === '0') {
+      this.display.value = Number(target.value);
       return;
     }
 
     if (this.currentOperation !== '') {
-      this.display.setValue = '';
+      this.localVariabel = '';
       this.currentOperation = '';
     }
 
-    const concatResult = this.display.value + number;
-    this.display.setValue = concatResult;
+    const concatResult = this.localVariabel + target.value;
+    this.display.value = Number(concatResult);
+    
   };
 
   operation = ({ target }) => {
@@ -107,7 +119,7 @@ class Calculator extends TempStorage {
         this.fraction(this.display.value);
         break;
       case operations.SQRT:
-        this.display.setValue = this.sqrt();
+        this.display.value = this.sqrt();
         this.currentOperation = '';
         return;
       case operations.CHANGE:
@@ -147,20 +159,33 @@ class Calculator extends TempStorage {
   }
 
   pow(first, second) {
-    return Math.pow(first, second);
+    return  Math.pow(first, second);
+    
   }
 
   change(first) {
-    this.display.setValue = first * -1;
+    this.display.value = first * -1;
     this.setFirstOperand = first * -1;
+    return;
   }
 
   fraction(first) {
-    return this.display.setValue = 1 / first;
+    let resultFraction = 0;
+    resultFraction = 1 / first;
+    // this.display.value = this.parseNumberString(resultFraction);
+    return;
   }
 
+//   parseNumberString = (number) => {
+//     let string = String(number);
+//     let rank = string.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ');
+
+//     parseFloat(string.toFixed(6), 9);  
+    
+// }
+
   sqrt() {
-    return Math.sqrt(this.display.value);
+    return parseFloat(Math.sqrt(this.display.value).toFixed(6), 9);
   }
     
 
@@ -182,7 +207,7 @@ class Calculator extends TempStorage {
         }
 
         resultText = displayText.length > 1 ? displayText.slice(0, -1) : 0;
-        this.display.setValue = resultText;
+        this.display.value = resultText;
         return;
       }
         this.currentOperation = '';
@@ -197,11 +222,11 @@ class Calculator extends TempStorage {
         }
 
     if (value === cleaningButtons.CLEAN) {
-      this.display.setValue = 0;
+      this.display.value = 0;
       this.setFirstOperand = '';
       this.setSecondOperand = '';
     }
-    this.display.setValue = 0;
+    this.display.value = 0;
   };
 
   motion() {
@@ -255,11 +280,13 @@ class Calculator extends TempStorage {
     };
 
     document.onmouseup = e => {
-      let coords = new LocalStor(this.coords);
-      let serialObj = JSON.stringify(coords);
+      let elem = e.target.closest('.hat__title');
+
+      if (!elem) return;
+      // let serialObj = JSON.stringify(coords);
       if (dragObject.avatar) {
         finishDrag(e);
-        localStorage.setItem('pos', serialObj);
+        // localStorage.setItem('position', serialObj);
       }
 
       dragObject = {};
@@ -367,6 +394,7 @@ class Calculator extends TempStorage {
     resizeCalc.ROLLUP.classList.toggle('disabled');
   }
   
+ 
 
   // get template() {
   //   return `

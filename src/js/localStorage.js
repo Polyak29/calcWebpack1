@@ -2,6 +2,10 @@ class LocalStor {
   constructor() {
     this.position();
   }
+
+  set setCalculatorStore(coords) {
+    
+  }
   position() {
     let returnObj = JSON.parse(localStorage.getItem('pos'));
     this.coords = {
