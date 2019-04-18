@@ -15,9 +15,9 @@
       <div class="calculator__display-hat hat">
         <div class="hat__title">Calculator</div>
         <div class="hat__buttons">
-          <div class="hat__buttons-rollUp"></div>
-          <div class="hat__buttons-expand disabled"></div>
-          <div class="hat__buttons-close"></div>
+          <div class="hat__buttons-rollUp js_controlButton" title="rollUp"></div>
+          <div class="hat__buttons-expand disabled js_controlButton" title="expand"></div>
+          <div class="hat__buttons-close js_controlButton" title="closeCalc"></div>
         </div>
       </div>
       <div class="calculator__display-types types">
@@ -31,25 +31,25 @@
         <input class="calculator__display-input--hidden2" type="hidden" pattern="^[ 0-9]+$" disabled="disabled" />
         <input class="calculator__display-input--memory" type="text" value="" pattern="^[ 0-9]+$" disabled="disabled" />
       </div>
-      <div class="calculator__display-memory memory-calculator">
-        <div class="memory-calculator__operations">
-          <button class="memory-calculator__operations--size disabled disabled js_memory__disabled" value="MC">MC</button>
-        </div>
-        <div class="memory-calculator__operations">
-          <button class="memory-calculator__operations--size disabled js_memory__disabled" value="MR">MR</button>
-        </div>
-        <div class="memory-calculator__operations">
-          <button class="memory-calculator__operations--size js_memory__enebled" value="M+">M+</button>
-        </div>
-        <div class="memory-calculator__operations">
-          <button class="memory-calculator__operations--size js_memory__enebled" value="M-">M-</button>
-        </div>
-        <div class="memory-calculator__operations">
-          <button class="memory-calculator__operations--size js_memory__enebled" value="MS">MS</button>
-        </div>
-        <div class="memory-calculator__operations">
-          <button class="memory-calculator__operations--size disabled js_memory__disabled" value="M">M</button>
-        </div>
+    </div>
+    <div class="calculator__memory memory-calculator">
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size disabled disabled js_memory__disabled" value="MC">MC</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size disabled js_memory__disabled" value="MR">MR</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size js_memory__enebled" value="M+">M+</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size js_memory__enebled" value="M-">M-</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size js_memory__enebled" value="MS">MS</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size disabled js_memory__disabled" value="M">M</button>
       </div>
     </div>
     <div class="calculator__keyboard">
@@ -64,7 +64,7 @@
           <button class="calculator__keyboard-button--operation js_operationButton" value="^">x <sup>n</sup></button>
         </div>
         <div class="calculator__keyboard-button">
-          <button class="calculator__keyboard-button--operation js_operationButton"
+          <button class="calculator__keyboard-button--operation js_resultButton"
             value="fraction"><sup>1</sup>/x</button>
         </div>
       </div>
@@ -140,8 +140,8 @@
       </div>
     </div>
   </div>
-  <div class="openCalc">
-    <p class="openCalc__text">OPEN Calculator</p>
+  <div class="openCalc js_controlButton" title="openCalc">
+    <p class="openCalc__text" disabled="disabled">OPEN Calculator</p>
   </div>
   <script src="dist/main.js" defer="true" rel='script'></script>
 </body>

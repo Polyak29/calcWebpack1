@@ -7,9 +7,7 @@ body{
 
 .calculator{
     position: absolute;
-    right: 0rem;
-    top: 4.5rem;
-    display:flex;
+    display:none;
     flex-flow: column nowrap;
     justify-content: center;
     align-items: stretch;
@@ -140,14 +138,6 @@ body{
                 background:rgb(223, 223, 223);
             }
         }
-        &-memory{
-            display: flex;
-            align-items: center;
-            align-content: center;
-            justify-content: center;
-            background:rgb(223, 223, 223);
-        
-        } 
     }
     
     
@@ -173,7 +163,14 @@ body{
         }
     }
 
-
+    &__memory{
+        display: flex;
+        align-items: center;
+        align-content: center;
+        justify-content: center;
+        background:rgb(223, 223, 223);
+    
+    } 
 
 
 
@@ -239,6 +236,7 @@ body{
 
 .openCalc{
     position: absolute;
+    cursor: pointer;
     right: 1rem;
     top: 32rem;
     height: 100px;
@@ -248,6 +246,7 @@ body{
     display:none;
     justify-content: center;
     align-items: center;
+    z-index: 300;
     animation:pulsing 2s infinite;
     box-shadow:  0 0 6px #3B6, 0 0 4em #022;
     @keyframes pulsing {
@@ -268,7 +267,6 @@ body{
 
     &__text{
         text-align: center;
-        cursor: pointer;
         font-family: a_BighausTitulBrkHll;
         text-shadow: 1px 1px 5px #387, 0 0 1em #fff;
         color: #ffffffbf;

@@ -36,7 +36,7 @@ export const minimize = {
   KEYBOARD: document.querySelector('.calculator__keyboard'),
   TYPES: document.querySelector('.types'),
   INPUT: document.querySelector('.calculator__display-input'),
-  MEMORY: document.querySelector('.calculator__display-memory')
+  MEMORY: document.querySelector('.calculator__memory')
 };
 
 export const resizeCalc = {
@@ -45,4 +45,19 @@ export const resizeCalc = {
   CLOSE: document.querySelector('.hat__buttons-close'),
   EXPAND: document.querySelector('.hat__buttons-expand'),
   ROLLUP: document.querySelector('.hat__buttons-rollUp')
+};
+
+
+export const controlButton = {
+  OPEN: 'openCalc',
+  CLOSE: 'closeCalc',
+  EXPAND: 'expand',
+  ROLLUP: 'rollUp'
+};
+
+export const calculatorModes = {
+  STANDART: 'standart',
+	MINIMIZED: 'minimized',
+	CLOSED: 'closed',
+	DEFAULT: 'default'
 };

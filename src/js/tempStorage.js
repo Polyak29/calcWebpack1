@@ -4,7 +4,7 @@ class TempStorage {
     this._tempStoreForSecondOperand = '';
   }
 
-  set setFirstOperand(value) {
+  set firstOperand(value) {
     this._tempStoreForFirstOperand = +value;
   }
 
@@ -12,7 +12,7 @@ class TempStorage {
     return +this._tempStoreForFirstOperand;
   }
 
-  set setSecondOperand(value) {
+  set secondOperand(value) {
     this._tempStoreForSecondOperand = +value;
   }
 

@@ -16,7 +16,7 @@ class Display {
 
     set value(value) {
         this._display.value = this.numberParsing(value);
-        this._value = String(value);
+        this._value = value;
     }
 
     get value() {
@@ -25,10 +25,8 @@ class Display {
 
     numberParsing = (variabel) =>{
         let number = Number(variabel);
-        let parse = parseFloat(number.toFixed(8),5);
-        let string = String(parse);
-        let rank = string.replace(/(\d)(?=(\d\d\d)+([^\d]|$))/g, '$1 ');
-        return rank;
+        let formater = new Intl.NumberFormat('ru');
+        return formater.format(number); 
       };
     
 

@@ -1,17 +1,14 @@
 class LocalStor {
-  constructor() {
-    this.position();
+  constructor(name, version) {
+    this.key = `${name}_${version}`;
   }
 
-  set setCalculatorStore(coords) {
-    
+  set coordinatesStore(obj) {
+    localStorage.setItem(this.key, JSON.stringify(obj));
   }
-  position() {
-    let returnObj = JSON.parse(localStorage.getItem('pos'));
-    this.coords = {
-      width: document.querySelector('.calculator').style.top,
-      height: document.querySelector('.calculator').style.left
-    };
+
+  get coordinatesStore() {
+    return JSON.parse(localStorage.getItem(this.key));
   }
 }
 export default LocalStor;
