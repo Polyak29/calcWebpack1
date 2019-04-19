@@ -1,12 +1,17 @@
-import Display from './display';
 import { memoryButtons } from './const';
 
 class Memory {
-  constructor() {
-    this.display = new Display();
+  constructor(props = {}, events = {
+    getDisplayValue: ()  => {},
+    setValue: () => {}
+  }) {
     this.localTempDisplay = 0;
+    this.events = events;
+  }
+
+  init() {
     [
-      ...document.getElementsByClassName('memory-calculator__operations--size')
+      ...this.$selector.getElementsByClassName('memory-calculator__operations--size')
     ].forEach(el => {
       el.addEventListener('click', this.workMemory);
     });
@@ -16,34 +21,65 @@ class Memory {
     let display = this.display.value;
     switch (target.value) {
       case memoryButtons.CLEAR:
-        this.display.setMemory = '';
+        this.events.setValue('memory', '');
         
-          [...document.getElementsByClassName('js_memory__disabled')].forEach(el => {
-            el.classList.toggle('disabled');
+          [...this.$selector.getElementsByClassName('js_memory__disabled')].forEach(el => {
+            el.classList.add('disabled');
           });
         break;
 
       case memoryButtons.READ:
-        this.display.setValue = this.localTempDisplay;
+        this.events.setValue('value', this.localTempDisplay);
+        // this.display.value = this.localTempDisplay;
         break;
 
       case memoryButtons.PLUS:
       console.log(display);
-        this.display.setMemory = this.localTempDisplay + display;
+        this.events.setValue('memory', this.localTempDisplay + display);
+        // this.display.memory = this.localTempDisplay + display;
         break;
 
       case memoryButtons.SUBSTRUCT:
-        this.display.setMemory = this.localTempDisplay - display;
+      this.events.setValue('memory', this.localTempDisplay - display);
+        // this.display.memory = this.localTempDisplay - display;
         break;
 
       case memoryButtons.SAVE:
-        this.localTempDisplay = this.display.value;
-        this.display.setMemory = this.localTempDisplay;
-        [...document.getElementsByClassName('js_memory__disabled')].forEach(el => {
-          el.classList.toggle('disabled');
+      this.localTempDisplay = this.events.getDisplayValue();
+      this.events.setValue('memory', this.localTempDisplay);
+      // this.display.memory = this.localTempDisplay;
+        [...this.$selector.getElementsByClassName('js_memory__disabled')].forEach(el => {
+          el.classList.remove('disabled');
         });
         break;
     }
+  }
+
+  
+
+  get template() {
+    return `
+    <div class="calculator__memory memory-calculator">
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size disabled disabled js_memory__disabled" value="MC">MC</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size disabled js_memory__disabled" value="MR">MR</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size js_memory__enebled" value="M+">M+</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size js_memory__enebled" value="M-">M-</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size js_memory__enebled" value="MS">MS</button>
+      </div>
+      <div class="memory-calculator__operations">
+        <button class="memory-calculator__operations--size disabled js_memory__disabled" value="M">M</button>
+      </div>
+    </div>
+    `;
   }
 }
 

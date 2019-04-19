@@ -1,7 +1,7 @@
 import Memory from './memory';
 import Display from './display';
 import LocalStor from './localStorage';
-import { operations, cleaningButtons, displayVisibility, minimize, resizeCalc, controlButton, calculatorModes } from './const';
+import { operations, cleaningButtons, displayVisibility, controlButton, calculatorModes } from './const';
 import TempStorage from './tempStorage';
 import {default as packageInfo} from './../../package.json';
 
@@ -9,37 +9,52 @@ import {default as packageInfo} from './../../package.json';
 class Calculator extends TempStorage {
   constructor() {
     super();
-  
-    this.memory = new Memory();
-    this.display = new Display();
     this.localStorage = new LocalStor(packageInfo.name, packageInfo.version);
-    this.init();
+    this.memory = new Memory({},
+      {
+        getDisplayValue: () => {
+          return this.display.value;
+        },
+        setValue: (key = 'value',  value) => {
+          this.display[key] = value;
+        }
+      });
+    this.display = new Display();
     this.isPressingResult = false;
     this.pastOperation = '';
     this.currentOperation = '';
     this.resultOperation = 0;
+    this.isConcatArchive = false;
+    this.ispressRusult = false;
     this.motion();
-    this.listenClass('js_insertSymbol', this.insert);
-    this.listenClass('js_operationButton', this.operation);
-    this.listenClass('js_cleanButton', this.clean);
-    this.listenClass('js_resultButton', this.calculateResult);
-    this.listenClass('js_controlButton', this.control);
-    resizeCalc.CALC.style.display = displayVisibility.FLEX;
+    this.addListenClass('js_insertSymbol', this.insert);
+    this.addListenClass('js_operationButton', this.operation);
+    this.addListenClass('js_cleanButton', this.clean);
+    this.addListenClass('js_resultButton', this.calculateResult);
+    this.addListenClass('js_controlButton', this.control);
     }
 
-  listenClass = (classSelector, nameMethod) => {
-    [...document.getElementsByClassName(classSelector)].forEach(el => {
+  init(selector) {
+    this.$selector = document.querySelector(selector);
+    this.$selector.innerHTML = this.template;
+    console.log(this.$selector);
+    this.display.init();
+    this.memory.init();
+    this.loadState();
+  }
+
+  addListenClass = (classSelector, nameMethod) => {
+    console.log(this.$selector);
+    [...document.querySelector('#root').getElementsByClassName(classSelector)].forEach(el => {
       el.addEventListener('click', nameMethod);
     });
   };
 
-
   calculateResult = ({ target }) => {
+    
     const firstOperand = this.firstOperand;
     const tempSecondOperand = this.secondOperand;
-    const secondOperand = tempSecondOperand
-      ? tempSecondOperand
-      : +this.display.value;
+    const secondOperand = tempSecondOperand ? tempSecondOperand : this.display.value;
 
     if (target.value === operations.PERCENT) {
       this.display.value = this.percent(firstOperand, secondOperand);
@@ -76,7 +91,43 @@ class Calculator extends TempStorage {
     this.firstOperand = this.resultOperation;
     this.secondOperand = secondOperand;
     this.isPressingResult = true;
+    this.isConcatArchive = false;
+    this.display.archive = '';
   };
+
+  result = () => {
+    if (this.secondOperand !== 0) {
+      this.secondOperand = 0;
+    }
+    const firstOperand = this.firstOperand;
+    const tempSecondOperand = this.secondOperand;
+    const secondOperand = tempSecondOperand ? tempSecondOperand : this.display.value;
+    switch (this.pastOperation) {
+      case operations.PLUS:
+        this.resultOperation = this.sum(firstOperand, secondOperand);
+        break;
+      case operations.MINUS:
+        this.resultOperation = this.subtract(firstOperand, secondOperand);
+        break;
+      case operations.MULTIPLY:
+        this.resultOperation = this.multyply(firstOperand, secondOperand);
+        break;
+      case operations.DIVIDE:
+        this.resultOperation = this.divide(firstOperand, secondOperand);
+        break;
+      case operations.POW:
+        this.resultOperation = this.pow(firstOperand, secondOperand);
+        break;
+
+    }
+    if (firstOperand === 0 && secondOperand === 0) {
+      return;
+    }
+    this.display.value = this.resultOperation;
+    this.firstOperand = this.resultOperation;
+    this.secondOperand = secondOperand;
+    this.isPressingResult = true;
+  }
 
   insert = ({ target }) => {
     this.localVariabel = String(this.display.value);
@@ -108,6 +159,7 @@ class Calculator extends TempStorage {
     if (this.currentOperation !== '') {
       this.localVariabel = '';
       this.currentOperation = '';
+      this.isConcatArchive = true;
     }
 
     if (this.isPressingResult) {
@@ -122,7 +174,7 @@ class Calculator extends TempStorage {
   };
 
   operation = ({ target }) => {
-
+    let localStoreArchive ='';
     switch (target.value) {
       case operations.FRAC:
         this.fraction(this.display.value);
@@ -146,12 +198,25 @@ class Calculator extends TempStorage {
         return this.change(this.firstOperand);
     }
 
+    if (this.isConcatArchive) {
+      this.currentOperation = target.value;
+      this.pastOperation = this.currentOperation;
+      const concatResult = `${this.display.archive} ${this.display.value} ${this.pastOperation}`;
+      this.display.archive = concatResult;
+      this.result();
+      return;
+    }
+
+    this.isConcatArchive = false;
     this.currentOperation = target.value;
     this.pastOperation = this.currentOperation;
+    if (this.isPressingResult) {
+      this.secondOperand = 0;
+    }
+  
     this.firstOperand = this.display.value;
-    this.secondOperand = '';
-
-
+    localStoreArchive = `${this.display.value} ${this.currentOperation}`;
+    this.display.archive = localStoreArchive;
   };
 
   sum(first, second) {
@@ -212,6 +277,8 @@ class Calculator extends TempStorage {
         this.firstOperand = '';
         this.secondOperand = '';
         this.resultOperation = 0;
+        this.isPressingResult = false;
+        this.display.archive = '';
         
     
         if (displayText === '0') {
@@ -360,150 +427,177 @@ class Calculator extends TempStorage {
   }
 
   control({target}) {
+    this.minimize = {
+      KEYBOARD: this.$selector.querySelector('.calculator__keyboard'),
+      TYPES: this.$selector.querySelector('.types'),
+      INPUT: this.$selector.querySelector('.calculator__display-input'),
+      MEMORY: this.$selector.querySelector('.calculator__memory')
+    };
+    this.this.resizeCalc = {
+      CALC: this.$selector.querySelector('.calculator'),
+      OPEN: this.$selector.querySelector('.openCalc'),
+      CLOSE: this.$selector.querySelector('.hat__buttons-close'),
+      EXPAND: this.$selector.querySelector('.hat__buttons-expand'),
+      ROLLUP: this.$selector.querySelector('.hat__buttons-rollUp')
+    };
     switch(target.title) {
       case controlButton.OPEN:
-      resizeCalc.CALC.style.display = displayVisibility.FLEX;
-      resizeCalc.OPEN.style.display = displayVisibility.NONE;
+      this.resizeCalc.CALC.style.display = displayVisibility.FLEX;
+      this.resizeCalc.OPEN.style.display = displayVisibility.NONE;
         break;
       case controlButton.CLOSE:
-        resizeCalc.CALC.style.position = 'absolute';
-        resizeCalc.CALC.style.top = '4.5rem';
-        resizeCalc.CALC.style.right = '1rem';
-        resizeCalc.CALC.style.left = 'auto';
-        resizeCalc.CALC.style.display = displayVisibility.NONE;
-        resizeCalc.OPEN.style.display = displayVisibility.FLEX;
+        this.resizeCalc.CALC.style.position = 'absolute';
+        this.resizeCalc.CALC.style.top = '4.5rem';
+        this.resizeCalc.CALC.style.right = '1rem';
+        this.resizeCalc.CALC.style.left = 'auto';
+        this.resizeCalc.CALC.style.display = displayVisibility.NONE;
+        this.resizeCalc.OPEN.style.display = displayVisibility.FLEX;
         break;
       case controlButton.EXPAND:
-        Object.entries(minimize).forEach(([, value]) => {
+        Object.entries(this.minimize).forEach(([, value]) => {
           value.style.display = displayVisibility.FLEX;
         });
-        resizeCalc.EXPAND.classList.toggle('disabled');
-        resizeCalc.ROLLUP.classList.toggle('disabled');
+        this.resizeCalc.EXPAND.classList.toggle('disabled');
+        this.resizeCalc.ROLLUP.classList.toggle('disabled');
         break;
       case controlButton.ROLLUP:
-        Object.entries(minimize).forEach(([, value]) => {
+        Object.entries(this.minimize).forEach(([, value]) => {
+          console.log("VALUE:", value);
+          console.log("VALUE.style:", value.style);
           value.style.display = displayVisibility.NONE;
         });
-        resizeCalc.EXPAND.classList.toggle('disabled');
-        resizeCalc.ROLLUP.classList.toggle('disabled');
+        this.resizeCalc.EXPAND.classList.toggle('disabled');
+        this.resizeCalc.ROLLUP.classList.toggle('disabled');
         break;
     }
   }
   
-  init(selector) {
-    this.loadState();
-	}
+
  
   saveState() {
      this.coords = {
       MODE: calculatorModes.DEFAULT,
-      X: document.querySelector('.calculator').style.top,
-      Y: document.querySelector('.calculator').style.left
+      X: this.events.querySelector('.calculator').style.top,
+      Y: this.events.querySelector('.calculator').style.left
     };
     this.localStorage.coordinatesStore = this.coords;
   }
   loadState() {
     let store = this.localStorage.coordinatesStore;
-    document.querySelector('.calculator').style.top = store.X;
-    document.querySelector('.calculator').style.left = store.Y;
+    this.events.querySelector('.calculator').style.top = store.X;
+    this.events.querySelector('.calculator').style.left = store.Y;
   }
   
   
 
-  // get template() {
-  //   return `
-  //     <div class="calculator">
-  //       ${this.display.template}
-  //       <div class="calculator__keyboard">
-  //         <div class="calculator__keyboard-container">
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_resultButton" value="percent">%</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_operationButton" value="sqrt">√</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_operationButton" value="^">x <sup>n</sup></button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_operationButton"
-  //               value="fraction"><sup>1</sup>/x</button>
-  //           </div>
-  //         </div>
-  //         <div class="calculator__keyboard-container">
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_cleanButton" value="CE">CE</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_cleanButton" value="C">C</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_cleanButton" value="removeLastNumber">⇐</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_operationButton" value="/">÷</button>
-  //           </div>
-  //         </div>
-  //         <div class="calculator__keyboard-container">
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="7">7</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="8">8</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="9">9</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_operationButton" value="*">×</button>
-  //           </div>
-  //         </div>
-  //         <div class="calculator__keyboard-container">
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="4">4</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="5">5</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="6">6</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_operationButton" value="-">-</button>
-  //           </div>
-  //         </div>
-  //         <div class="calculator__keyboard-container">
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="1">1</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="2">2</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="3">3</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_operationButton" value="+">+</button>
-  //           </div>
-  //         </div>
-  //         <div class="calculator__keyboard-container">
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_operationButton" value="change">±</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--number js_insertSymbol" value="0">0</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_insertSymbol" value=".">,</button>
-  //           </div>
-  //           <div class="calculator__keyboard-button">
-  //             <button class="calculator__keyboard-button--operation js_resultButton" value="=">=</button>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  // 	`;
-  // }
+  get template() {
+    return `
+    <div class="hat">
+    <div class="hat__title">Calculator</div>
+    <div class="hat__buttons">
+      <div class="hat__buttons-rollUp js_controlButton" title="rollUp"></div>
+      <div class="hat__buttons-expand disabled js_controlButton" title="expand"></div>
+      <div class="hat__buttons-close js_controlButton" title="closeCalc"></div>
+    </div>
+  </div>
+  <div class="body">
+    <div class="calculator">
+    ${this.display.template}
+    ${this.memory.template}
+      <div class="calculator__keyboard">
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_resultButton" value="percent">%</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_operationButton" value="sqrt">√</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_operationButton" value="^">x <sup>n</sup></button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_resultButton"
+              value="fraction"><sup>1</sup>/x</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_cleanButton" value="CE">CE</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_cleanButton" value="C">C</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_cleanButton" value="removeLastNumber">⇐</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_operationButton" value="/">÷</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="7">7</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="8">8</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="9">9</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_operationButton" value="*">×</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="4">4</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="5">5</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="6">6</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_operationButton" value="-">-</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="1">1</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="2">2</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="3">3</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_operationButton" value="+">+</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_operationButton" value="change">±</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js_insertSymbol" value="0">0</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_insertSymbol" value=".">,</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js_resultButton" value="=">=</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="openCalc js_controlButton" title="openCalc">
+      <p class="openCalc__text" disabled="disabled">OPEN Calculator</p>
+    </div>
+  </div>  
+  	`;
+  }
 }
 
 export default Calculator;

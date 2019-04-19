@@ -5,90 +5,97 @@ body{
     overflow: hidden;
 }
 
+#root{
+    display: flex;
+    flex-flow: column nowrap;
+    box-shadow: 0 0 5px #3b6, 0 0 1em #022;
+    flex-basis: auto;
+    width: 317px;
+}
+
+.hat{
+    display: flex;
+    width: 317px;
+    background:#dfdfdf;
+    &__title{
+        flex: 0 0 65%;
+        display: flex;
+        height: 25px;
+        margin-left: 15px;
+        font-size: 12px;
+        align-items: flex-end;
+        cursor: default;
+    }
+    &__buttons{
+        display: flex;
+        flex: 0 0 26%;
+        justify-content: space-between;
+        align-items: flex-end;
+        &-rollUp{
+            height: 10px;
+            width: 10px;
+            border-bottom: 1px solid black;
+            &:hover {
+                cursor: pointer;
+              }
+        }
+        &-expand{
+            height: 10px;
+            width: 10px;
+            border: 1px solid black;
+            &:hover {
+                cursor: pointer;
+              }
+            
+        }
+        &-close{
+            height: 10px;
+            width: 10px;
+            padding-bottom: 2px;
+            &::before {
+                content: "";
+                position: absolute;
+                height: 14px;
+                width: 1px;
+                background-color: #000;
+                transform: rotate(45deg);
+                margin-left: 4px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            }
+            &::after{
+                content: "";
+                position: absolute;
+                height: 14px;
+                width: 1px;
+                background-color: #000;
+                transform: rotate(-45deg);
+                margin-left: 4px;
+            }
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }  
+}
+.body{
+    display:flex;
+    align-items: stretch;
+}
 .calculator{
-    position: absolute;
-    display:none;
+    display:flex;
     flex-flow: column nowrap;
     justify-content: center;
     align-items: stretch;
-    width: 317px;
-    flex-basis:0;
+    flex-basis:317px;
     background:#dfdfdf;
     box-sizing: border-box;
-    box-shadow: 0 0 5px #3b6, 0 0 1em #022;
 
     &__display{
         display: flex;
         flex-flow:column;
         align-items: stretch;
         background:rgb(223, 223, 223);
-        &-hat{
-            display: flex;  
-        }
-        .hat{
-            display: flex;
-            margin: 0px 2px 7px 5px;
-            &__title{
-                flex: 0 0 65%;
-                display: flex;
-                height: 25px;
-                margin-left: 15px;
-                font-size: 12px;
-                align-items: flex-end;
-                cursor: default;
-            }
-            &__buttons{
-                display: flex;
-                flex: 0 0 26%;
-                justify-content: space-between;
-                align-items: flex-end;
-                &-rollUp{
-                    height: 10px;
-                    width: 10px;
-                    border-bottom: 1px solid black;
-                    &:hover {
-                        cursor: pointer;
-                      }
-                }
-                &-expand{
-                    height: 10px;
-                    width: 10px;
-                    border: 1px solid black;
-                    &:hover {
-                        cursor: pointer;
-                      }
-                    
-                }
-                &-close{
-                    height: 10px;
-                    width: 10px;
-                    padding-bottom: 2px;
-                    &::before {
-                        content: "";
-                        position: absolute;
-                        height: 14px;
-                        width: 1px;
-                        background-color: #000;
-                        transform: rotate(45deg);
-                        margin-left: 4px;
-                        box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                    }
-                    &::after{
-                        content: "";
-                        position: absolute;
-                        height: 14px;
-                        width: 1px;
-                        background-color: #000;
-                        transform: rotate(-45deg);
-                        margin-left: 4px;
-                    }
-                    &:hover {
-                        cursor: pointer;
-                    }
-                }
-            }  
-        }
-        
+
         .types{
             display: flex;
             margin: 6px 0 0 17px;

@@ -32,21 +32,6 @@ export const displayVisibility = {
   NONE: 'none'
 };
 
-export const minimize = {
-  KEYBOARD: document.querySelector('.calculator__keyboard'),
-  TYPES: document.querySelector('.types'),
-  INPUT: document.querySelector('.calculator__display-input'),
-  MEMORY: document.querySelector('.calculator__memory')
-};
-
-export const resizeCalc = {
-  CALC: document.querySelector('.calculator'),
-  OPEN: document.querySelector('.openCalc'),
-  CLOSE: document.querySelector('.hat__buttons-close'),
-  EXPAND: document.querySelector('.hat__buttons-expand'),
-  ROLLUP: document.querySelector('.hat__buttons-rollUp')
-};
-
 
 export const controlButton = {
   OPEN: 'openCalc',
