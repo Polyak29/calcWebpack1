@@ -41,7 +41,7 @@ export const controlButton = {
 };
 
 export const calculatorModes = {
-  STANDART: 'standart',
+  STANDARD: 'standart',
 	MINIMIZED: 'minimized',
 	CLOSED: 'closed',
 	DEFAULT: 'default'

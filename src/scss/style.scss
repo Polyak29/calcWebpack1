@@ -6,89 +6,90 @@ body{
 }
 
 #root{
-    display: flex;
-    flex-flow: column nowrap;
+    position: absolute;
     box-shadow: 0 0 5px #3b6, 0 0 1em #022;
     flex-basis: auto;
     width: 317px;
 }
 
-.hat{
-    display: flex;
-    width: 317px;
-    background:#dfdfdf;
-    &__title{
-        flex: 0 0 65%;
-        display: flex;
-        height: 25px;
-        margin-left: 15px;
-        font-size: 12px;
-        align-items: flex-end;
-        cursor: default;
-    }
-    &__buttons{
-        display: flex;
-        flex: 0 0 26%;
-        justify-content: space-between;
-        align-items: flex-end;
-        &-rollUp{
-            height: 10px;
-            width: 10px;
-            border-bottom: 1px solid black;
-            &:hover {
-                cursor: pointer;
-              }
-        }
-        &-expand{
-            height: 10px;
-            width: 10px;
-            border: 1px solid black;
-            &:hover {
-                cursor: pointer;
-              }
-            
-        }
-        &-close{
-            height: 10px;
-            width: 10px;
-            padding-bottom: 2px;
-            &::before {
-                content: "";
-                position: absolute;
-                height: 14px;
-                width: 1px;
-                background-color: #000;
-                transform: rotate(45deg);
-                margin-left: 4px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            }
-            &::after{
-                content: "";
-                position: absolute;
-                height: 14px;
-                width: 1px;
-                background-color: #000;
-                transform: rotate(-45deg);
-                margin-left: 4px;
-            }
-            &:hover {
-                cursor: pointer;
-            }
-        }
-    }  
-}
-.body{
-    display:flex;
-    align-items: stretch;
-}
+
+
 .calculator{
     display:flex;
     flex-flow: column nowrap;
     justify-content: center;
     align-items: stretch;
-    flex-basis:317px;
     background:#dfdfdf;
     box-sizing: border-box;
+
+    &__hat{
+        display: flex;
+        width: 317px;
+        background:#dfdfdf;
+    }
+
+    .hat{
+        display: flex;
+        &__title{
+            flex: 0 0 65%;
+            display: flex;
+            height: 25px;
+            margin-left: 15px;
+            font-size: 12px;
+            align-items: flex-end;
+            cursor: default;
+        }
+        &__buttons{
+            display: flex;
+            flex: 0 0 26%;
+            justify-content: space-between;
+            align-items: flex-end;
+            &-rollUp{
+                height: 10px;
+                width: 10px;
+                border-bottom: 1px solid black;
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+            &-expand{
+                height: 10px;
+                width: 10px;
+                border: 1px solid black;
+                &:hover {
+                    cursor: pointer;
+                }
+                
+            }
+            &-close{
+                height: 10px;
+                width: 10px;
+                padding-bottom: 2px;
+                &::before {
+                    content: "";
+                    position: absolute;
+                    height: 14px;
+                    width: 1px;
+                    background-color: #000;
+                    transform: rotate(45deg);
+                    margin-left: 4px;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                }
+                &::after{
+                    content: "";
+                    position: absolute;
+                    height: 14px;
+                    width: 1px;
+                    background-color: #000;
+                    transform: rotate(-45deg);
+                    margin-left: 4px;
+                }
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+        }
+    }  
 
     &__display{
         display: flex;
@@ -242,6 +243,7 @@ body{
 }
 
 .openCalc{
+    display:none;
     position: absolute;
     cursor: pointer;
     right: 1rem;
@@ -250,7 +252,6 @@ body{
     width: 100px;
     border-radius: 50%;
     background: #b9b9b9;
-    display:none;
     justify-content: center;
     align-items: center;
     z-index: 300;

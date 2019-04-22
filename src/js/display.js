@@ -1,12 +1,16 @@
 class Display {
-    constructor() {
+    constructor()
+    {
         this._value = 0;
     }
 
-    init() {
-        this._display = this.$selector.querySelector('.calculator__display-input--size');
-        this._archive = this.$selector.querySelector('.calculator__display-input--shadow');
-        this._memory = this.$selector.querySelector('.calculator__display-input--memory');
+    init($selector = null) {
+        if ($selector === null) {
+            return;
+        }
+        this._display = $selector.querySelector('.calculator__display-input--size');
+        this._archive = $selector.querySelector('.calculator__display-input--shadow');
+        this._memory = $selector.querySelector('.calculator__display-input--memory');
     }
 
     set memory(value) {

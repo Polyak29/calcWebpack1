@@ -1,7 +1,7 @@
 import Memory from './memory';
 import Display from './display';
 import LocalStor from './localStorage';
-import { operations, cleaningButtons, displayVisibility, controlButton, calculatorModes } from './const';
+import { operations, cleaningButtons, controlButton, calculatorModes } from './const';
 import TempStorage from './tempStorage';
 import {default as packageInfo} from './../../package.json';
 
@@ -10,7 +10,7 @@ class Calculator extends TempStorage {
   constructor() {
     super();
     this.localStorage = new LocalStor(packageInfo.name, packageInfo.version);
-    this.memory = new Memory({},
+    this.memory = new Memory(
       {
         getDisplayValue: () => {
           return this.display.value;
@@ -20,38 +20,40 @@ class Calculator extends TempStorage {
         }
       });
     this.display = new Display();
-    this.isPressingResult = false;
     this.pastOperation = '';
     this.currentOperation = '';
     this.resultOperation = 0;
+    this.isPressingResult = false;
     this.isConcatArchive = false;
-    this.ispressRusult = false;
+    this.isPressOperation = false;
+    this.isPressNumber = false;
     this.motion();
-    this.addListenClass('js_insertSymbol', this.insert);
-    this.addListenClass('js_operationButton', this.operation);
-    this.addListenClass('js_cleanButton', this.clean);
-    this.addListenClass('js_resultButton', this.calculateResult);
-    this.addListenClass('js_controlButton', this.control);
     }
 
   init(selector) {
     this.$selector = document.querySelector(selector);
     this.$selector.innerHTML = this.template;
-    console.log(this.$selector);
-    this.display.init();
-    this.memory.init();
-    this.loadState();
+    this.display.init(this.$selector);
+    this.memory.init(this.$selector);
+    this.addListenClass('js_insertSymbol', this.insert);
+    this.addListenClass('js_operationButton', this.operation);
+    this.addListenClass('js_cleanButton', this.clean);
+    this.addListenClass('js_resultButton', this.calculateResult);
+    this.addListenClass('js_controlButton', this.control);
+    this.loadFromState();
   }
 
-  addListenClass = (classSelector, nameMethod) => {
-    console.log(this.$selector);
-    [...document.querySelector('#root').getElementsByClassName(classSelector)].forEach(el => {
-      el.addEventListener('click', nameMethod);
+  addListenClass = (classSelector, callback) => {
+    [...this.$selector.getElementsByClassName(classSelector)].forEach(el => {
+      el.addEventListener('click', callback.bind(this));
     });
   };
 
   calculateResult = ({ target }) => {
-    
+    // if (this.secondOperand !== 0) {
+    //   this.secondOperand = 0;
+    // }
+    this.isPressOperation = false;
     const firstOperand = this.firstOperand;
     const tempSecondOperand = this.secondOperand;
     const secondOperand = tempSecondOperand ? tempSecondOperand : this.display.value;
@@ -96,12 +98,16 @@ class Calculator extends TempStorage {
   };
 
   result = () => {
+    this.isPressOperation = false;
     if (this.secondOperand !== 0) {
       this.secondOperand = 0;
     }
     const firstOperand = this.firstOperand;
     const tempSecondOperand = this.secondOperand;
     const secondOperand = tempSecondOperand ? tempSecondOperand : this.display.value;
+    if (this.pastOperation !== this.pressOperation) {
+      this.pastOperation = this.pressOperation;
+    }
     switch (this.pastOperation) {
       case operations.PLUS:
         this.resultOperation = this.sum(firstOperand, secondOperand);
@@ -130,6 +136,9 @@ class Calculator extends TempStorage {
   }
 
   insert = ({ target }) => {
+    this.pastOperation = this.pressOperation;
+    this.isPressNumber = true;
+    this.isPressOperation = false;
     this.localVariabel = String(this.display.value);
 
     if (target.value === operations.COMMA) {
@@ -174,6 +183,8 @@ class Calculator extends TempStorage {
   };
 
   operation = ({ target }) => {
+    this.isPressOperation = true;
+    this.pressOperation = target.value;
     let localStoreArchive ='';
     switch (target.value) {
       case operations.FRAC:
@@ -199,12 +210,21 @@ class Calculator extends TempStorage {
     }
 
     if (this.isConcatArchive) {
-      this.currentOperation = target.value;
-      this.pastOperation = this.currentOperation;
-      const concatResult = `${this.display.archive} ${this.display.value} ${this.pastOperation}`;
-      this.display.archive = concatResult;
-      this.result();
-      return;
+      if (!this.isPressNumber) {
+        const concatResult = `${this.display.archive.slice(0, -1)}${this.pressOperation}`;
+        this.display.archive = concatResult;
+        return;
+      }
+
+      if (this.isPressOperation) {
+        this.isPressNumber = false;
+        this.currentOperation = target.value;
+        // this.pastOperation = this.currentOperation;
+        this.result();
+        const concatResult = `${this.display.archive} ${this.secondOperand} ${this.pressOperation}`;
+        this.display.archive = concatResult;
+        return;
+      }
     }
 
     this.isConcatArchive = false;
@@ -259,15 +279,15 @@ class Calculator extends TempStorage {
   }
 
   clean = ({ target }) => {
+    this.isPressOperation = false;
     const { value } = target;
     let resultText = '';
-    const displayText = this.display.value;
+    const displayText = String(this.display.value);
 
     if (value === cleaningButtons.REMOVE_LAST_SYMBOL) {
         if (this.resultOperation !== 0){
           return;
         }
-
         resultText = displayText.length > 1 ? displayText.slice(0, -1) : 0;
         this.display.value = resultText;
         return;
@@ -278,6 +298,9 @@ class Calculator extends TempStorage {
         this.secondOperand = '';
         this.resultOperation = 0;
         this.isPressingResult = false;
+        this.isConcatArchive = false;
+        this.isPressOperation = false;
+        this.isPressNumber = false;
         this.display.archive = '';
         
     
@@ -293,15 +316,14 @@ class Calculator extends TempStorage {
     this.display.value = 0;
   };
 
-  motion() {
+  motion = () => {
     let dragObject = {};
 
     let self = this;
 
     document.onmousedown = e => {
       if (e.which !== 1) return;
-
-      let elem = e.target.closest('.calculator');
+      let elem = e.target.closest('#root');
       if (!elem) return;
 
       dragObject.elem = elem;
@@ -345,7 +367,6 @@ class Calculator extends TempStorage {
 
     document.onmouseup = e => {
       let elem = e.target.closest('.hat__title');
-
       if (!elem) 
         return;
       if (dragObject.avatar) {
@@ -427,13 +448,7 @@ class Calculator extends TempStorage {
   }
 
   control({target}) {
-    this.minimize = {
-      KEYBOARD: this.$selector.querySelector('.calculator__keyboard'),
-      TYPES: this.$selector.querySelector('.types'),
-      INPUT: this.$selector.querySelector('.calculator__display-input'),
-      MEMORY: this.$selector.querySelector('.calculator__memory')
-    };
-    this.this.resizeCalc = {
+    this.resizeCalc = {
       CALC: this.$selector.querySelector('.calculator'),
       OPEN: this.$selector.querySelector('.openCalc'),
       CLOSE: this.$selector.querySelector('.hat__buttons-close'),
@@ -442,66 +457,58 @@ class Calculator extends TempStorage {
     };
     switch(target.title) {
       case controlButton.OPEN:
-      this.resizeCalc.CALC.style.display = displayVisibility.FLEX;
-      this.resizeCalc.OPEN.style.display = displayVisibility.NONE;
+      this.$selector.querySelector('.openCalc').style.display = 'none';
+      this.$selector.querySelector('.calculator').style.display = 'flex';
         break;
       case controlButton.CLOSE:
-        this.resizeCalc.CALC.style.position = 'absolute';
-        this.resizeCalc.CALC.style.top = '4.5rem';
-        this.resizeCalc.CALC.style.right = '1rem';
-        this.resizeCalc.CALC.style.left = 'auto';
-        this.resizeCalc.CALC.style.display = displayVisibility.NONE;
-        this.resizeCalc.OPEN.style.display = displayVisibility.FLEX;
+        this.$selector.querySelector('.calculator').style.position = 'absolute';
+        this.$selector.querySelector('.calculator').style.top = '4.5rem';
+        this.$selector.querySelector('.calculator').style.right = '1rem';
+        this.$selector.querySelector('.calculator').style.left = 'auto';
+        this.$selector.querySelector('.openCalc').style.display = 'flex';
+        this.$selector.querySelector('.calculator').style.display = 'none';
         break;
       case controlButton.EXPAND:
-        Object.entries(this.minimize).forEach(([, value]) => {
-          value.style.display = displayVisibility.FLEX;
-        });
-        this.resizeCalc.EXPAND.classList.toggle('disabled');
-        this.resizeCalc.ROLLUP.classList.toggle('disabled');
+        this.$selector.querySelector('.body').style.display = 'block';
+        this.$selector.querySelector('.hat__buttons-expand').classList.toggle('disabled');
+        this.$selector.querySelector('.hat__buttons-rollUp').classList.toggle('disabled');
         break;
       case controlButton.ROLLUP:
-        Object.entries(this.minimize).forEach(([, value]) => {
-          console.log("VALUE:", value);
-          console.log("VALUE.style:", value.style);
-          value.style.display = displayVisibility.NONE;
-        });
-        this.resizeCalc.EXPAND.classList.toggle('disabled');
-        this.resizeCalc.ROLLUP.classList.toggle('disabled');
+        this.$selector.querySelector('.body').style.display = 'none';
+        this.$selector.querySelector('.hat__buttons-expand').classList.toggle('disabled');
+        this.$selector.querySelector('.hat__buttons-rollUp').classList.toggle('disabled');
         break;
     }
   }
   
 
  
-  saveState() {
+  saveState = () => {
      this.coords = {
-      MODE: calculatorModes.DEFAULT,
-      X: this.events.querySelector('.calculator').style.top,
-      Y: this.events.querySelector('.calculator').style.left
+      MODE: calculatorModes.STANDARD,
+      X: document.querySelector('#root').style.top,
+      Y: document.querySelector('#root').style.left
     };
     this.localStorage.coordinatesStore = this.coords;
   }
-  loadState() {
+  loadFromState = () => {
     let store = this.localStorage.coordinatesStore;
-    this.events.querySelector('.calculator').style.top = store.X;
-    this.events.querySelector('.calculator').style.left = store.Y;
+    document.querySelector('#root').style.top = store.X;
+    document.querySelector('#root').style.left = store.Y;
   }
-  
-  
 
   get template() {
     return `
-    <div class="hat">
-    <div class="hat__title">Calculator</div>
-    <div class="hat__buttons">
-      <div class="hat__buttons-rollUp js_controlButton" title="rollUp"></div>
-      <div class="hat__buttons-expand disabled js_controlButton" title="expand"></div>
-      <div class="hat__buttons-close js_controlButton" title="closeCalc"></div>
+  <div class="calculator">
+    <div class="calculator__hat hat">
+      <div class="hat__title">Calculator</div>
+      <div class="hat__buttons">
+        <div class="hat__buttons-rollUp js_controlButton" title="rollUp"></div>
+        <div class="hat__buttons-expand disabled js_controlButton" title="expand"></div>
+        <div class="hat__buttons-close js_controlButton" title="closeCalc"></div>
+      </div>
     </div>
-  </div>
   <div class="body">
-    <div class="calculator">
     ${this.display.template}
     ${this.memory.template}
       <div class="calculator__keyboard">
@@ -592,10 +599,10 @@ class Calculator extends TempStorage {
         </div>
       </div>
     </div>
-    <div class="openCalc js_controlButton" title="openCalc">
-      <p class="openCalc__text" disabled="disabled">OPEN Calculator</p>
-    </div>
   </div>  
+  <div class="openCalc js_controlButton" title="openCalc">
+    <p class="openCalc__text" disabled="disabled">OPEN Calculator</p>
+  </div>
   	`;
   }
 }

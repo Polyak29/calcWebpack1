@@ -1,56 +1,59 @@
 import { memoryButtons } from './const';
 
 class Memory {
-  constructor(props = {}, events = {
+  constructor( events = {
     getDisplayValue: ()  => {},
     setValue: () => {}
   }) {
     this.localTempDisplay = 0;
     this.events = events;
+   
   }
 
-  init() {
+  init(selector) {
+    this.selector = selector;
     [
-      ...this.$selector.getElementsByClassName('memory-calculator__operations--size')
+      ...selector.getElementsByClassName('memory-calculator__operations--size')
     ].forEach(el => {
       el.addEventListener('click', this.workMemory);
     });
   }
 
   workMemory = ({ target }) => {
-    let display = this.display.value;
+    let display = this.events.getDisplayValue();
     switch (target.value) {
       case memoryButtons.CLEAR:
         this.events.setValue('memory', '');
         
-          [...this.$selector.getElementsByClassName('js_memory__disabled')].forEach(el => {
+          [...this.selector.getElementsByClassName('js_memory__disabled')].forEach(el => {
             el.classList.add('disabled');
           });
         break;
 
       case memoryButtons.READ:
         this.events.setValue('value', this.localTempDisplay);
-        // this.display.value = this.localTempDisplay;
         break;
 
       case memoryButtons.PLUS:
-      console.log(display);
         this.events.setValue('memory', this.localTempDisplay + display);
-        // this.display.memory = this.localTempDisplay + display;
+        [...this.selector.getElementsByClassName('js_memory__disabled')].forEach(el => {
+          el.classList.remove('disabled');
+        });
         break;
 
       case memoryButtons.SUBSTRUCT:
       this.events.setValue('memory', this.localTempDisplay - display);
-        // this.display.memory = this.localTempDisplay - display;
+      [...this.selector.getElementsByClassName('js_memory__disabled')].forEach(el => {
+        el.classList.remove('disabled');
+      });
         break;
 
       case memoryButtons.SAVE:
       this.localTempDisplay = this.events.getDisplayValue();
       this.events.setValue('memory', this.localTempDisplay);
-      // this.display.memory = this.localTempDisplay;
-        [...this.$selector.getElementsByClassName('js_memory__disabled')].forEach(el => {
-          el.classList.remove('disabled');
-        });
+      [...this.selector.getElementsByClassName('js_memory__disabled')].forEach(el => {
+        el.classList.remove('disabled');
+      });
         break;
     }
   }
