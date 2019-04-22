@@ -50,9 +50,9 @@ class Calculator extends TempStorage {
   };
 
   calculateResult = ({ target }) => {
-    // if (this.secondOperand !== 0) {
-    //   this.secondOperand = 0;
-    // }
+    if (this.display.archive.length > 4) {
+      this.secondOperand = 0;
+    }
     this.isPressOperation = false;
     const firstOperand = this.firstOperand;
     const tempSecondOperand = this.secondOperand;
@@ -64,6 +64,7 @@ class Calculator extends TempStorage {
     }
 
     if (target.value === operations.FRAC) {
+      this.display.archive = `1/(${secondOperand})`;
       this.display.value = this.fraction(secondOperand);
       return;
     }
@@ -86,9 +87,11 @@ class Calculator extends TempStorage {
         break;
 
     }
+
     if (firstOperand === 0 && secondOperand === 0) {
       return;
     }
+
     this.display.value = this.resultOperation;
     this.firstOperand = this.resultOperation;
     this.secondOperand = secondOperand;
@@ -99,15 +102,21 @@ class Calculator extends TempStorage {
 
   result = () => {
     this.isPressOperation = false;
+
     if (this.secondOperand !== 0) {
       this.secondOperand = 0;
     }
+
     const firstOperand = this.firstOperand;
+
     const tempSecondOperand = this.secondOperand;
+
     const secondOperand = tempSecondOperand ? tempSecondOperand : this.display.value;
-    if (this.pastOperation !== this.pressOperation) {
-      this.pastOperation = this.pressOperation;
+
+    if (this.pastOperation === this.pressOperation) {
+      this.pastOperation = this.pressOperation; //точка останова
     }
+
     switch (this.pastOperation) {
       case operations.PLUS:
         this.resultOperation = this.sum(firstOperand, secondOperand);
@@ -126,9 +135,11 @@ class Calculator extends TempStorage {
         break;
 
     }
+
     if (firstOperand === 0 && secondOperand === 0) {
       return;
     }
+
     this.display.value = this.resultOperation;
     this.firstOperand = this.resultOperation;
     this.secondOperand = secondOperand;
@@ -142,6 +153,7 @@ class Calculator extends TempStorage {
     this.localVariabel = String(this.display.value);
 
     if (target.value === operations.COMMA) {
+
       if (this.currentOperation !== '') {
         this.setDisplay.value = 0 + operations.COMMA;
         return;
@@ -196,6 +208,7 @@ class Calculator extends TempStorage {
         return;
       case operations.CHANGE:
         this.localVariabel = Number(this.display.value);
+
         if (this.pastOperation === '') {
           this.pastOperation = target.value;
           this.change(this.localVariabel);
@@ -210,6 +223,7 @@ class Calculator extends TempStorage {
     }
 
     if (this.isConcatArchive) {
+
       if (!this.isPressNumber) {
         const concatResult = `${this.display.archive.slice(0, -1)}${this.pressOperation}`;
         this.display.archive = concatResult;
@@ -218,9 +232,8 @@ class Calculator extends TempStorage {
 
       if (this.isPressOperation) {
         this.isPressNumber = false;
-        this.currentOperation = target.value;
-        // this.pastOperation = this.currentOperation;
         this.result();
+        this.currentOperation = target.value;
         const concatResult = `${this.display.archive} ${this.secondOperand} ${this.pressOperation}`;
         this.display.archive = concatResult;
         return;
@@ -230,6 +243,7 @@ class Calculator extends TempStorage {
     this.isConcatArchive = false;
     this.currentOperation = target.value;
     this.pastOperation = this.currentOperation;
+
     if (this.isPressingResult) {
       this.secondOperand = 0;
     }
@@ -285,13 +299,16 @@ class Calculator extends TempStorage {
     const displayText = String(this.display.value);
 
     if (value === cleaningButtons.REMOVE_LAST_SYMBOL) {
+
         if (this.resultOperation !== 0){
           return;
         }
+
         resultText = displayText.length > 1 ? displayText.slice(0, -1) : 0;
         this.display.value = resultText;
         return;
       }
+
         this.currentOperation = '';
         this.pastOperation = '';
         this.firstOperand = '';
@@ -323,11 +340,12 @@ class Calculator extends TempStorage {
 
     document.onmousedown = e => {
       if (e.which !== 1) return;
+
       let elem = e.target.closest('#root');
+
       if (!elem) return;
 
       dragObject.elem = elem;
-
       dragObject.downX = e.pageX;
       dragObject.downY = e.pageY;
 
@@ -339,6 +357,7 @@ class Calculator extends TempStorage {
 
       if (!dragObject.avatar) {
         let moveX = e.pageX - dragObject.downX;
+
         let moveY = e.pageY - dragObject.downY;
 
         if (Math.abs(moveX) < 1 && Math.abs(moveY) < 1) {
@@ -348,7 +367,6 @@ class Calculator extends TempStorage {
         dragObject.avatar = createAvatar(e);
         if (!dragObject.avatar) {
           dragObject = {};
-
           return;
         }
 
@@ -361,7 +379,6 @@ class Calculator extends TempStorage {
 
       dragObject.avatar.style.left = e.pageX - dragObject.shiftX + 'px';
       dragObject.avatar.style.top = e.pageY - dragObject.shiftY + 'px';
-
       return false;
     };
 
@@ -369,6 +386,7 @@ class Calculator extends TempStorage {
       let elem = e.target.closest('.hat__title');
       if (!elem) 
         return;
+
       if (dragObject.avatar) {
         finishDrag(e);
         this.saveState();
@@ -382,13 +400,15 @@ class Calculator extends TempStorage {
 
       if (!dropElem) {
         self.onDragCancel(dragObject);
-      } else {
-        self.onDragEnd(dragObject, dropElem);
-      }
+      } 
+
+      self.onDragEnd(dragObject, dropElem);
+      
     };
 
     let createAvatar = e => {
       let avatar = dragObject.elem;
+
       let elem = e.target.closest('.hat__title');
 
       if (!elem) return;
@@ -409,7 +429,6 @@ class Calculator extends TempStorage {
         avatar.style.top = old.top;
         avatar.style.zIndex = old.zIndex;
       };
-
       return avatar;
     };
 
@@ -431,6 +450,7 @@ class Calculator extends TempStorage {
       if (elem == null) {
         return null;
       }
+
       return elem.closest('body');
     };
 
@@ -447,45 +467,50 @@ class Calculator extends TempStorage {
     };
   }
 
-  control({target}) {
+  control(event) {
     this.resizeCalc = {
       CALC: this.$selector.querySelector('.calculator'),
       OPEN: this.$selector.querySelector('.openCalc'),
       CLOSE: this.$selector.querySelector('.hat__buttons-close'),
       EXPAND: this.$selector.querySelector('.hat__buttons-expand'),
-      ROLLUP: this.$selector.querySelector('.hat__buttons-rollUp')
+      ROLLUP: this.$selector.querySelector('.hat__buttons-rollUp'),
+      BODY: this.$selector.querySelector('.body')
+
     };
-    switch(target.title) {
+
+    switch(event.target.title) {
       case controlButton.OPEN:
-      this.$selector.querySelector('.openCalc').style.display = 'none';
-      this.$selector.querySelector('.calculator').style.display = 'flex';
+        this.resizeCalc.OPEN.style.display = 'none';
+        this.resizeCalc.CALC.style.display = 'flex';
         break;
       case controlButton.CLOSE:
-        this.$selector.querySelector('.calculator').style.position = 'absolute';
-        this.$selector.querySelector('.calculator').style.top = '4.5rem';
-        this.$selector.querySelector('.calculator').style.right = '1rem';
-        this.$selector.querySelector('.calculator').style.left = 'auto';
-        this.$selector.querySelector('.openCalc').style.display = 'flex';
-        this.$selector.querySelector('.calculator').style.display = 'none';
+        this.resizeCalc.CALC.style.position = 'absolute';
+        this.resizeCalc.CALC.style.top = '4.5rem';
+        this.resizeCalc.CALC.style.right = '1rem';
+        this.resizeCalc.CALC.style.left = 'auto';
+        this.resizeCalc.OPEN.style.display = 'flex';
+        this.resizeCalc.CALC.style.display = 'none';
         break;
       case controlButton.EXPAND:
-        this.$selector.querySelector('.body').style.display = 'block';
-        this.$selector.querySelector('.hat__buttons-expand').classList.toggle('disabled');
-        this.$selector.querySelector('.hat__buttons-rollUp').classList.toggle('disabled');
+        this.resizeCalc.BODY.style.display = 'block';
+        this.resizeCalc.EXPAND.classList.toggle('disabled');
+        this.resizeCalc.ROLLUP.classList.toggle('disabled');
+        this.currentMode = calculatorModes.STANDARD;
+        this.saveState();
         break;
       case controlButton.ROLLUP:
-        this.$selector.querySelector('.body').style.display = 'none';
-        this.$selector.querySelector('.hat__buttons-expand').classList.toggle('disabled');
-        this.$selector.querySelector('.hat__buttons-rollUp').classList.toggle('disabled');
+        this.resizeCalc.BODY.style.display = 'none';
+        this.resizeCalc.EXPAND.classList.toggle('disabled');
+        this.resizeCalc.ROLLUP.classList.toggle('disabled');
+        this.currentMode = calculatorModes.MINIMIZED;
+        this.saveState();
         break;
     }
   }
-  
-
  
   saveState = () => {
      this.coords = {
-      MODE: calculatorModes.STANDARD,
+      MODE: this.currentMode,
       X: document.querySelector('#root').style.top,
       Y: document.querySelector('#root').style.left
     };
@@ -493,6 +518,7 @@ class Calculator extends TempStorage {
   }
   loadFromState = () => {
     let store = this.localStorage.coordinatesStore;
+
     document.querySelector('#root').style.top = store.X;
     document.querySelector('#root').style.left = store.Y;
   }
