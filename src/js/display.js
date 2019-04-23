@@ -10,11 +10,11 @@ class Display {
         }
         this._display = $selector.querySelector('.calculator__display-input--size');
         this._archive = $selector.querySelector('.calculator__display-input--shadow');
-        this._memory = $selector.querySelector('.calculator__display-input--memory');
+        this._memory = $selector.querySelector('.memoryList');
     }
 
     set memory(value) {
-        this._memory.value = value;
+        this._memory.value= value;
     }
 
     get memory() {
@@ -47,20 +47,20 @@ class Display {
     };
 
     get template() {
-        return `
-        <div class="calculator__display">
-        <div class="calculator__display-types types">
-          <div class="types__btn">≡ </div>
-          <div class="types__name"> Standard </div>
-        </div>
-        <div class="calculator__display-input">
-          <input class="calculator__display-input--shadow" type="text" value="" pattern="^[ 0-9]+$" disabled="disabled" />
-          <input class="calculator__display-input--size" type="text" value="0" pattern="^[ 0-9]+$" disabled="disabled" />
-          <input class="calculator__display-input--hidden" type="hidden" pattern="^[ 0-9]+$" disabled="disabled" />
-          <input class="calculator__display-input--hidden2" type="hidden" pattern="^[ 0-9]+$" disabled="disabled" />
-          <input class="calculator__display-input--memory" type="text" value="" pattern="^[ 0-9]+$" disabled="disabled" />
-        </div>
-      </div>
+        return  `
+            <div class="calculator__display">
+                <div class="calculator__display-types types">
+                <div class="types__btn">≡ </div>
+                <div class="types__name"> Standard </div>
+                </div>
+                <div class="calculator__display-input">
+                <input class="calculator__display-input--shadow" type="text" value="" pattern="^[ 0-9]+$" disabled="disabled" />
+                <input class="calculator__display-input--size" type="text" value="0" pattern="^[ 0-9]+$" disabled="disabled" />
+                <input class="calculator__display-input--hidden" type="hidden" pattern="^[ 0-9]+$" disabled="disabled" />
+                <input class="calculator__display-input--hidden2" type="hidden" pattern="^[ 0-9]+$" disabled="disabled" />
+                <input class="calculator__display-input--memory" type="text" value="" pattern="^[ 0-9]+$" disabled="disabled" />
+                </div>
+            </div>
         `;
     }
 }
