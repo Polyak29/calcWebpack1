@@ -35,14 +35,13 @@ export const displayVisibility = {
 
 export const controlButton = {
   OPEN: 'openCalc',
-  CLOSE: 'closeCalc',
-  EXPAND: 'expand',
-  ROLLUP: 'rollUp'
+  CLOSE: 'closed',
+  EXPAND: 'standard',
+  ROLLUP: 'minimized'
 };
 
 export const calculatorModes = {
   STANDARD: 'standard',
 	MINIMIZED: 'minimized',
-	CLOSED: 'closed',
-	DEFAULT: 'default'
+	CLOSED: 'closed'
 };

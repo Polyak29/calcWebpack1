@@ -7,7 +7,6 @@ body{
 
 #root{
     position: absolute;
-    box-shadow: 0 0 5px #3b6, 0 0 1em #022;
     flex-basis: auto;
     width: 317px;
     position: relative;
@@ -16,6 +15,7 @@ body{
 
 
 .calculator{
+    box-shadow: 0 0 5px #3b6, 0 0 1em #022;
     display:flex;
     flex-flow: column nowrap;
     justify-content: center;
@@ -237,7 +237,7 @@ body{
         }
     }
 
-    .memoryList {
+    .memory-list {
         position: absolute;
         top: 228px;
         bottom: 0;
@@ -246,62 +246,85 @@ body{
         background:rgb(241, 241, 241);
         overflow-y: scroll;
 
-        &__block {
+        &__item {
           display: flex;
-          flex-flow: row nowrap;
+          flex-flow: row wrap;
           justify-content: flex-end;
           align-items: flex-end;
           height: 67px;
           font-size: 25px;
           padding: 10px 20px 5px 20px;
           text-align: right;
-          &:hover {
+          &:hover .memory-list__item-clear {
+            visibility: visible;
+          }
+          &:hover .memory-list__item-plus {
+            visibility: visible;
+          }
+          &:hover .memory-list__item-minus {
+            visibility: visible;
+          }
+          &:hover  {
             background: #dbdbdb;
           }
-        
 
-        &-btnClear {
-          display: inline-block;
-          font-size: 18px;
+        &-value  {
+          flex: 0 0 100%;
+          font-weight: 600;
+          font-size: 26px;
+        }  
+
+        &-clear {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          visibility: hidden;
+          font-size: 14px;
           background: #fdfdfd;
           margin-left: 1px;
           height: 25px;
           width: 35px;
           text-align: center;
-          line-height: 35px;
           font-weight: 600;
+          cursor :default;
           &:hover {
             background: #2a27fc;
             color: #fff;
           }
         }
 
-        &-btnPlus {
-          display: inline-block;
-          font-size: 18px;
+        &-plus {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          visibility: hidden;
+          font-size: 14px;
           background: #fdfdfd;
           margin-left: 1px;
           height: 25px;
           width: 35px;
           text-align: center;
-          line-height: 35px;
           font-weight: 600;
+          cursor :default;
           &:hover {
             background:#2a27fc;
             color: #fff;
           }
         }
 
-        &-btnMinus {
-          display: inline-block;
-          font-size: 18px;
+        &-minus {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          visibility: hidden;
+          font-size: 14px;
           background: #fdfdfd;
           margin-left: 1px;
           height: 25px;
           width: 35px;
           text-align: center;
-          line-height: 35px;
           font-weight: 600;
+          cursor :default;
           &:hover {
             background: #2a27fc;
             color: #fff;
@@ -313,9 +336,12 @@ body{
 
 .openCalc{
     position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    right: 0;
+    top: 474px;
     cursor: pointer;
-    right: 1rem;
-    top: 32rem;
     height: 100px;
     width: 100px;
     border-radius: 50%;
@@ -342,7 +368,7 @@ body{
     }
 
     &__text{
-        text-align: center;
+      text-align: center;
         font-family: a_BighausTitulBrkHll;
         text-shadow: 1px 1px 5px #387, 0 0 1em #fff;
         color: #ffffffbf;

@@ -10,7 +10,7 @@ class Display {
         }
         this._display = $selector.querySelector('.calculator__display-input--size');
         this._archive = $selector.querySelector('.calculator__display-input--shadow');
-        this._memory = $selector.querySelector('.memoryList');
+        this._memory = $selector.querySelector('.memory-list');
     }
 
     set memory(value) {
@@ -53,7 +53,7 @@ class Display {
                 <div class="types__btn">≡ </div>
                 <div class="types__name"> Standard </div>
                 </div>
-                <div class="calculator__display-input">
+                <div class="calculator__display-input" data-value="">
                 <input class="calculator__display-input--shadow" type="text" value="" pattern="^[ 0-9]+$" disabled="disabled" />
                 <input class="calculator__display-input--size" type="text" value="0" pattern="^[ 0-9]+$" disabled="disabled" />
                 <input class="calculator__display-input--hidden" type="hidden" pattern="^[ 0-9]+$" disabled="disabled" />

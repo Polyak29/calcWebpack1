@@ -17,6 +17,10 @@ class Calculator extends TempStorage {
         },
         setValue: (key = 'value',  value) => {
           this.display[key] = value;
+        },
+        setLocalStorage: (array) => {
+          this.ArrayValues = array;
+          this.saveState();
         }
       });
     this.display = new Display();
@@ -34,13 +38,15 @@ class Calculator extends TempStorage {
     this.$selector = document.querySelector(selector);
     this.$selector.innerHTML = this.template;
     this.display.init(this.$selector);
-    this.memory.init(this.$selector);
+    this.loadFromlStorage();
+    this.memory.init(this.$selector, this.ArrayValues);
     this.addListenClass('js-insertSymbol', this.insert);
     this.addListenClass('js-operationButton', this.operation);
     this.addListenClass('js-cleanButton', this.clean);
     this.addListenClass('js-resultButton', this.calculateResult);
     this.addListenClass('js-controlButton', this.control);
-    this.loadStateFromLocalStorage();
+    console.log(document.body.clientWidth);
+    console.log(document.body.clientHeight);
   }
 
   addListenClass = (classSelector, callback) => {
@@ -468,7 +474,53 @@ class Calculator extends TempStorage {
   }
 
   control(event) {
-    this.resizeCalc = {
+    if (event.currentTarget.dataset.value === controlButton.OPEN ) {
+      this.resizeCalc.CALC.classList.remove('none');
+      this.resizeCalc.OPEN.classList.add('none');
+      this.currentMode = calculatorModes.STANDARD;
+      this.saveState();
+      return;
+    }
+
+    switch(event.target.dataset.value) {
+      case controlButton.CLOSE:
+        this.setMode(calculatorModes.CLOSED);
+        this.currentMode = calculatorModes.CLOSED;
+        this.saveState();
+        break;
+      case controlButton.EXPAND:
+        this.setMode(calculatorModes.STANDARD);
+        this.currentMode = calculatorModes.STANDARD;
+        this.saveState();
+        break;
+      case controlButton.ROLLUP:
+        this.setMode(calculatorModes.MINIMIZED);
+        this.currentMode = calculatorModes.MINIMIZED;
+        this.saveState();
+        break;
+    }
+  }
+ 
+  saveState = () => {
+      this.saveStateCalc = {
+      MEMORY_HISTORY: this.ArrayValues, 
+      MODE: this.currentMode || 'standard',
+      X: document.querySelector('#root').style.top,
+      Y: document.querySelector('#root').style.left
+    };
+
+    this.localStorage.coordinatesStore = this.saveStateCalc;
+  }
+
+  loadFromlStorage = () => {
+    let store = this.localStorage.coordinatesStore;
+    this.setMode(store.MODE);
+    this.setPosition(store.X, store.Y);
+    this.setMemoryList(store.MEMORY_HISTORY);
+  }
+
+  setMode = (mode) => {
+      this.resizeCalc = {
       CALC: this.$selector.querySelector('.calculator'),
       OPEN: this.$selector.querySelector('.openCalc'),
       CLOSE: this.$selector.querySelector('.hat__buttons-close'),
@@ -477,66 +529,38 @@ class Calculator extends TempStorage {
       BODY: this.$selector.querySelector('.body')
     };
 
-    switch(event.target.dataset.value) {
-      case controlButton.OPEN:
-        this.resizeCalc.BODY.classList.remove('none');
-        this.resizeCalc.CALC.classList.remove('none');
-        this.resizeCalc.OPEN.classList.add('none');
-        this.currentMode = calculatorModes.STANDARD;
-        this.saveState();
-        break;
-      case controlButton.CLOSE:
-        this.resizeCalc.CALC.style.position = 'absolute';
-        this.resizeCalc.CALC.style.bottom = 6;
-        this.resizeCalc.CALC.style.right = 0;
-        this.resizeCalc.CALC.classList.add('none');
-        this.resizeCalc.OPEN.classList.remove('none');
-        this.currentMode = calculatorModes.CLOSED;
-        this.saveState();
-        break;
-      case controlButton.EXPAND:
-        this.resizeCalc.BODY.classList.remove('none');
-        this.resizeCalc.EXPAND.classList.toggle('disabled');
-        this.resizeCalc.ROLLUP.classList.toggle('disabled');
-        this.currentMode = calculatorModes.STANDARD;
-        this.saveState();
-        break;
-      case controlButton.ROLLUP:
+    let coordsX = document.body.clientWidth - (document.body.clientWidth - 320),
+        coordsY = document.body.clientHeight + 378;
+        console.log(coordsX);
+    switch(mode) {
+      case calculatorModes.MINIMIZED:
         this.resizeCalc.BODY.classList.add('none');
         this.resizeCalc.EXPAND.classList.toggle('disabled');
         this.resizeCalc.ROLLUP.classList.toggle('disabled');
-        this.currentMode = calculatorModes.MINIMIZED;
-        this.saveState();
-        break;
-    }
-  }
- 
-  saveState = () => {
-     this.saveStateCalc = {
-      MODE: this.currentMode,
-      X: document.querySelector('#root').style.top,
-      Y: document.querySelector('#root').style.left
-    };
-    this.localStorage.coordinatesStore = this.saveStateCalc;
-  }
-  loadStateFromLocalStorage = () => {
-    let store = this.localStorage.coordinatesStore;
-    switch(store.MODE) {
-      case calculatorModes.MINIMIZED:
-      this.$selector.querySelector('.body').classList.add('none');
-        this.$selector.querySelector('.hat__buttons-expand').classList.toggle('disabled');
-        this.$selector.querySelector('.hat__buttons-rollUp').classList.toggle('disabled');
         break;
       case calculatorModes.STANDARD:
-      document.querySelector('#root').classList.remove('none');
-      this.$selector.querySelector('.body').classList.remove('none');
+        this.$selector.classList.remove('none');
+        this.resizeCalc.BODY.classList.remove('none');
+        this.resizeCalc.EXPAND.classList.add('disabled');
+        this.resizeCalc.ROLLUP.classList.remove('disabled');
         break;
       case calculatorModes.CLOSED:
-      document.querySelector('.calculator').classList.add('none');
-      this.$selector.querySelector('.openCalc').classList.toggle('none');
-    }
-    document.querySelector('#root').style.top = store.X;
-    document.querySelector('#root').style.left = store.Y;
+        this.resizeCalc.CALC.classList.add('none');
+        this.resizeCalc.OPEN.classList.remove('none');
+        document.querySelector('#root').style.position = 'relative';
+        document.querySelector('#root').style.left = `${coordsX}px`;
+        document.querySelector('#root').style.top = `${coordsY}px`;
+        break;
+      }
+  }
+
+  setPosition = (x, y) => {
+    document.querySelector('#root').style.top = x;
+    document.querySelector('#root').style.left = y;
+  }
+
+  setMemoryList = (lSMemoryHistory) => {
+    this.ArrayValues = lSMemoryHistory;
   }
 
   get template() {
@@ -545,9 +569,9 @@ class Calculator extends TempStorage {
     <div class="calculator__hat hat">
       <div class="hat__title">Calculator</div>
       <div class="hat__buttons">
-        <div class="hat__buttons-rollUp js-controlButton" data-value="rollUp"></div>
-        <div class="hat__buttons-expand disabled js-controlButton" data-value="expand"></div>
-        <div class="hat__buttons-close js-controlButton" data-value="closeCalc"></div>
+        <div class="hat__buttons-rollUp js-controlButton" data-value="minimized"></div>
+        <div class="hat__buttons-expand disabled js-controlButton" data-value="standard"></div>
+        <div class="hat__buttons-close js-controlButton" data-value="closed"></div>
       </div>
     </div>
   <div class="body">
@@ -642,6 +666,7 @@ class Calculator extends TempStorage {
       </div>
       ${this.memory.template.listMemory}
     </div>
+  </div>
   </div>  
   <div class="openCalc js-controlButton none" data-value="openCalc">
     <p class="openCalc__text" disabled="disabled">OPEN Calculator</p>
