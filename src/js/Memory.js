@@ -11,17 +11,17 @@ class Memory {
 
   init(selector, data = []) {
     this.selector = selector;
-    this.data = data;
-    if (this.data.length <= 1 && this.data[0] === 0) {
+    this.arrayValues = data;
+    if (this.arrayValues.length <= 1 && this.arrayValues[0] === 0) {
       this.events.setValue('memory', '');
 
-      [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
+      [...this.selector.getElementsByClassName('js-memory__disabled')].forEach((el) => {
         el.classList.add('disabled');
       });
     }
 
-    if (this.data.length > 1) {
-        this.data.forEach(el => {
+    if (this.arrayValues.length > 1) {
+        this.arrayValues.forEach(el => {
             this.createItem(el);
         } );
 
@@ -45,48 +45,50 @@ class Memory {
       [...this.selector.getElementsByClassName('js-memory__set')].forEach(el => {
         el.classList.remove('disabled');
       });
+       this.createItem(0);
       return;
      }
      this.selector.querySelector('.memory-list').classList.add('none');
      [...this.selector.getElementsByClassName('js-nonList')].forEach(el => {
       el.classList.remove('disabled');
-    });  }
+    });
+  };
 
   workMemory = ({ target }) => {
     switch (target.value) {
       case memoryButtons.CLEAR:
-          [...this.selector.querySelectorAll('.memory-list__item')].forEach( el => {
-            el.remove();
-          });
-          this.data = [0];
-          this.createItem(0);
-          this.events.setLocalStorage(this.data);
-          this.events.setValue('memory', '');
-          [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
-            el.classList.add('disabled');
-          });
+        [...this.selector.querySelectorAll('.memory-list__item')].forEach( el => {
+          el.remove();
+        });
+        this.arrayValues = [0];
+        this.createItem(0);
+        this.events.setLocalStorage(this.arrayValues);
+        this.events.setValue('memory', '');
+        [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
+          el.classList.add('disabled');
+        });
         break;
 
       case memoryButtons.READ:
-        this.events.setValue('value', this.data[0]);
+        this.events.setValue('value', this.arrayValues[0]);
         break;
 
         case memoryButtons.PLUS:
-        this.data[0] = this.data[0] + this.events.getDisplayValue();
-        this.selector.querySelector('.memory-list__item-value').innerHTML = this.data[0];
+        this.arrayValues[0] = this.arrayValues[0] + this.events.getDisplayValue();
+        this.selector.querySelector('.memory-list__item-value').innerHTML = this.arrayValues[0];
         this.events.setValue('memory', this.localTempDisplay);
-        this.events.setLocalStorage(this.data);
+        this.events.setLocalStorage(this.arrayValues);
         [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
           el.classList.remove('disabled');
         });
         break;
 
       case memoryButtons.SUBSTRUCT:
-      if (this.data.length !== 0 ) {
-        this.data[0] = this.data[0] - this.events.getDisplayValue();
-        this.selector.querySelector('.memory-list__item-value').innerHTML = this.data[0];
+      if (this.arrayValues.length !== 0 ) {
+        this.arrayValues[0] = this.arrayValues[0] - this.events.getDisplayValue();
+        this.selector.querySelector('.memory-list__item-value').innerHTML = this.arrayValues[0];
         this.events.setValue('memory', this.localTempDisplay);
-        this.events.setLocalStorage(this.data);
+        this.events.setLocalStorage(this.arrayValues);
         [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
           el.classList.remove('disabled');
         });
@@ -99,15 +101,15 @@ class Memory {
         break;
 
       case memoryButtons.SAVE:
-          [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
-              el.classList.remove('disabled');
-          });
+        [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
+            el.classList.remove('disabled');
+        });
 
-        if (this.data[0] === 0) {
-            this.data  = [];
-            this.saveMemoryInList();
-            this.events.setValue('memory', this.localTempDisplay);
-            return;
+        if (this.arrayValues[0] === 0) {
+          this.arrayValues  = [];
+          this.saveMemoryInList();
+          this.events.setValue('memory', this.localTempDisplay);
+          return;
         }
 
         this.saveMemoryInList();
@@ -121,90 +123,90 @@ class Memory {
         this.selector.querySelector('.memory-list').classList.toggle('none');
         this.addListenerItemMemoryList();
     }
-  }
+  };
 
   saveMemoryInList = () => {
-    this.data.unshift(this.events.getDisplayValue());
-    this.events.setLocalStorage(this.data);
-      this.createItem(this.data[0]);
-  }
+    this.arrayValues.unshift(this.events.getDisplayValue());
+    this.events.setLocalStorage(this.arrayValues);
+    this.createItem(this.arrayValues[0]);
+  };
 
   createItem = (el) => {
-      const memoryList =  this.selector.querySelector('.memory-list');
-      let wrapper = {
-          cell: document.createElement('div'),
-          value: document.createElement('div'),
-          clear: document.createElement('div'),
-          plus: document.createElement('div'),
-          minus: document.createElement('div')
-      };
-      wrapper.cell.className = 'memory-list__item';
+    const memoryList =  this.selector.querySelector('.memory-list');
+    let wrapper = {
+      cell: document.createElement('div'),
+      value: document.createElement('div'),
+      clear: document.createElement('div'),
+      plus: document.createElement('div'),
+      minus: document.createElement('div')
+    };
+    wrapper.cell.className = 'memory-list__item';
 
-      wrapper.value.className = 'memory-list__item-value';
+    wrapper.value.className = 'memory-list__item-value';
 
-      wrapper.clear.className = 'memory-list__item-clear js-memory';
-      wrapper.clear.setAttribute('data-key', memoryButtons.CLEAR);
-      wrapper.clear.innerHTML = memoryButtons.CLEAR;
+    wrapper.clear.className = 'memory-list__item-clear js-memory';
+    wrapper.clear.setAttribute('data-key', memoryButtons.CLEAR);
+    wrapper.clear.innerHTML = memoryButtons.CLEAR;
 
-      wrapper.plus.className = 'memory-list__item-plus js-memory';
-      wrapper.plus.setAttribute('data-key', memoryButtons.PLUS);
-      wrapper.plus.innerHTML = memoryButtons.PLUS;
+    wrapper.plus.className = 'memory-list__item-plus js-memory';
+    wrapper.plus.setAttribute('data-key', memoryButtons.PLUS);
+    wrapper.plus.innerHTML = memoryButtons.PLUS;
 
-      wrapper.minus.className = 'memory-list__item-minus js-memory';
-      wrapper.minus.setAttribute('data-key', memoryButtons.SUBSTRUCT);
-      wrapper.minus.innerHTML = memoryButtons.SUBSTRUCT;
+    wrapper.minus.className = 'memory-list__item-minus js-memory';
+    wrapper.minus.setAttribute('data-key', memoryButtons.SUBSTRUCT);
+    wrapper.minus.innerHTML = memoryButtons.SUBSTRUCT;
 
-      memoryList.insertBefore(wrapper.cell, memoryList.firstChild);
+    memoryList.insertBefore(wrapper.cell, memoryList.firstChild);
 
-      wrapper.cell.appendChild(wrapper.value).innerHTML = el;
-      wrapper.cell.appendChild(wrapper.value).setAttribute('data-value', el);
+    wrapper.cell.appendChild(wrapper.value).innerHTML = el;
+    wrapper.cell.appendChild(wrapper.value).setAttribute('data-value', el);
 
-      wrapper.cell.appendChild(wrapper.clear);
-      wrapper.cell.appendChild(wrapper.plus);
-      wrapper.cell.appendChild(wrapper.minus);
-  }
+    wrapper.cell.appendChild(wrapper.clear);
+    wrapper.cell.appendChild(wrapper.plus);
+    wrapper.cell.appendChild(wrapper.minus);
+  };
 
   addListenerItemMemoryList = () => {
-      this.selector.querySelectorAll('.memory-list__item').forEach(item => {
-        item.addEventListener('click', this.workWithButtonsInMemoryList);
-      });
-    }
+    this.selector.querySelectorAll('.memory-list__item').forEach(item => {
+      item.addEventListener('click', this.workWithButtonsInMemoryList);
+    });
+  };
 
   workWithButtonsInMemoryList = (event) => {
     switch(event.target.dataset.key) {
       case memoryButtons.PLUS:
         this.numberOfMemory = Number(event.currentTarget.querySelector('.memory-list__item-value').dataset.value);
         this.resultOperationInMemory = this.numberOfMemory + this.events.getDisplayValue();
-        this.data[find(this.data, this.numberOfMemory)] = this.resultOperationInMemory;
-        this.data.splice(this.data.indexOf(this.numberOfMemory), 1, this.resultOperationInMemory);
+        this.arrayValues[find(this.arrayValues, this.numberOfMemory)] = this.resultOperationInMemory;
+        this.arrayValues.splice(this.arrayValues.indexOf(this.numberOfMemory), 1, this.resultOperationInMemory);
         event.currentTarget.querySelector('.memory-list__item-value').setAttribute('data-value', this.resultOperationInMemory);
         event.currentTarget.querySelector('.memory-list__item-value').innerHTML = this.resultOperationInMemory;
-        this.events.setLocalStorage(this.data);
+        this.events.setLocalStorage(this.arrayValues);
         break;
       case memoryButtons.CLEAR:
         this.numberOfMemory = Number(event.currentTarget.querySelector('.memory-list__item-value').dataset.value);
         event.currentTarget.remove();
-        this.data.splice(this.data.indexOf(this.numberOfMemory), 1);
-        this.events.setLocalStorage(this.data);
+        this.arrayValues.splice(this.arrayValues.indexOf(this.numberOfMemory), 1);
+        this.events.setLocalStorage(this.arrayValues);
         if (this.selector.querySelector('.memory-list__item') === null) {
           [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
             el.classList.add('disabled');
           });
-            this.data = [0];
-            this.events.setLocalStorage(this.data);
+            this.arrayValues = [0];
+            this.events.setLocalStorage(this.arrayValues);
         }
         break;
       case memoryButtons.SUBSTRUCT:
       this.numberOfMemory = Number(event.currentTarget.querySelector('.memory-list__item-value').dataset.value);
       this.resultOperationInMemory = this.numberOfMemory - this.events.getDisplayValue();
-      this.data[find(this.data, this.numberOfMemory)] = this.resultOperationInMemory;
-      this.data.splice(this.data.indexOf(this.numberOfMemory), 1, this.resultOperationInMemory);
+      this.arrayValues[find(this.arrayValues, this.numberOfMemory)] = this.resultOperationInMemory;
+      this.arrayValues.splice(this.arrayValues.indexOf(this.numberOfMemory), 1, this.resultOperationInMemory);
       event.currentTarget.querySelector('.memory-list__item-value').setAttribute('data-value', this.resultOperationInMemory);
       event.currentTarget.querySelector('.memory-list__item-value').innerHTML = this.resultOperationInMemory;
-      this.events.setLocalStorage(this.data);
+      this.events.setLocalStorage(this.arrayValues);
       break;
     }
-  }
+  };
 
 
 

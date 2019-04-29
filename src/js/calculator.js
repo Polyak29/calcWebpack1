@@ -19,7 +19,7 @@ class Calculator extends TempStorage {
           this.display[key] = value;
         },
         setLocalStorage: (array) => {
-          this.ArrayValues = array;
+          this.arrayValues = array;
           this.saveState();
         }
       });
@@ -38,42 +38,60 @@ class Calculator extends TempStorage {
     this.$selector = document.querySelector(selector);
     this.$selector.innerHTML = this.template;
     this.display.init(this.$selector);
-    this.loadFromlStorage();
-    this.memory.init(this.$selector, this.ArrayValues);
-    this.addListenClass('js-insertSymbol', this.insert);
-    this.addListenClass('js-operationButton', this.operation);
-    this.addListenClass('js-cleanButton', this.clean);
-    this.addListenClass('js-resultButton', this.calculateResult);
-    this.addListenClass('js-controlButton', this.control);
+    this.loadFromlS();
+    this.memory.init(this.$selector, this.arrayValues);
+    this.addListener({selector:this.$selector, nameClass: 'js-control', callback: this.control});
+    this.addListener({selector:this.$selector, nameClass: 'js-result', callback: this.calculateResult});
+    this.addListener({selector:this.$selector, nameClass: 'js-clean', callback: this.clean});
+    this.addListener({selector:this.$selector, nameClass: 'js-operation', callback: this.operation});
+    this.addListener({selector:this.$selector, nameClass: 'js-insert', callback: this.insert});
   }
 
-  removeListenClass = (classSelector, callback) => {
-    [...this.$selector.getElementsByClassName(classSelector)].forEach(el => {
-      el.removeEventListener('click', callback.bind(this));
-    });
+  removeListener  = (props) => {
+    const {selector, nameClass, callback,  handler} = props;
+    if (selector === this.$selector) {
+      [...selector.getElementsByClassName(nameClass)].forEach(el => {
+        el.removeEventListener('click', callback.bind(this));
+      });
+      return;
+    }
+
+    if (selector === document) {
+      selector.removeEventListener(handler, callback.bind(this));
+    }
   };
 
-  addListenClass = (classSelector, callback) => {
-    [...this.$selector.getElementsByClassName(classSelector)].forEach(el => {
-      el.addEventListener('click', callback.bind(this));
-    });
+
+
+  addListener = (props) => {
+    const {selector, nameClass, callback,  handler} = props;
+    if (selector === this.$selector) {
+      [...selector.getElementsByClassName(nameClass)].forEach(el => {
+        el.addEventListener('click', callback.bind(this));
+      });
+      return;
+    }
+
+    if (selector === document) {
+      selector.addEventListener(handler, callback.bind(this));
+    }
   };
 
-  calculateResult = ({ target }) => {
+  calculateResult = (event) => {
     if (this.display.archive.length > 4) {
       this.secondOperand = 0;
     }
     this.isPressOperation = false;
     const firstOperand = this.firstOperand;
     const tempSecondOperand = this.secondOperand;
-    const secondOperand = tempSecondOperand ? tempSecondOperand : this.display.value;
+    const secondOperand = tempSecondOperand || this.display.value;
 
-    if (target.value === operations.PERCENT) {
+    if (event.target.value === operations.PERCENT) {
       this.display.value = this.percent(firstOperand, secondOperand);
       return;
     }
 
-    if (target.value === operations.FRAC) {
+    if (event.target.value === operations.FRAC) {
       this.display.archive = `1/(${secondOperand})`;
       this.display.value = this.fraction(secondOperand);
       return;
@@ -111,17 +129,12 @@ class Calculator extends TempStorage {
   };
 
   result = () => {
-    this.isPressOperation = false;
-
-    if (this.secondOperand !== 0) {
-      this.secondOperand = 0;
-    }
-
     const firstOperand = this.firstOperand;
-
     const tempSecondOperand = this.secondOperand;
-
     const secondOperand = tempSecondOperand ? tempSecondOperand : this.display.value;
+
+    this.isPressOperation = false;
+    this.secondOperand = 0;
 
     if (this.pastOperation === this.pressOperation) {
       this.pastOperation = this.pressOperation; 
@@ -154,7 +167,7 @@ class Calculator extends TempStorage {
     this.firstOperand = this.resultOperation;
     this.secondOperand = secondOperand;
     this.isPressingResult = true;
-  }
+  };
 
   insert = ({ target }) => {
     this.pastOperation = this.pressOperation;
@@ -207,7 +220,6 @@ class Calculator extends TempStorage {
   operation = ({ target }) => {
     this.isPressOperation = true;
     this.pressOperation = target.value;
-    let localStoreArchive = '';
     switch (target.value) {
       case operations.FRAC:
         this.fraction(this.display.value);
@@ -233,7 +245,6 @@ class Calculator extends TempStorage {
     }
 
     if (this.isConcatArchive) {
-
       if (!this.isPressNumber) {
         const concatResult = `${this.display.archive.slice(0, -1)}${this.pressOperation}`;
         this.display.archive = concatResult;
@@ -259,54 +270,43 @@ class Calculator extends TempStorage {
     }
   
     this.firstOperand = this.display.value;
-    localStoreArchive = `${this.display.value} ${this.currentOperation}`;
+    let localStoreArchive = `${this.display.value} ${this.currentOperation}`;
     this.display.archive = localStoreArchive;
   };
 
-  sum(first, second) {
-    return first + second;
-  }
+  sum = (first, second) =>  first + second;
 
-  divide(first, second) {
-    return first / second;
-  }
 
-  multyply(first, second) {
-    return first * second;
-  }
+  divide = (first, second) => first / second;
 
-  subtract(first, second) {
-    return first - second;
-  }
+  multyply = (first, second) => first * second;
 
-  pow(first, second) {
-    return  Math.pow(first, second);
-    
-  }
+  subtract = (first, second) => first - second;
+
+  pow = (first, second) => Math.pow(first, second);
 
   change(first) {
+    if (this.display.value === 0) {
+      return;
+    }
+
     this.display.value = first * -1;
     this.firstOperand = first * -1;
-    return;
   }
 
-  fraction(first) {
-    return  1 / first;
-  }
+  fraction = first => 1 / first;
 
   sqrt() {
     return parseFloat(Math.sqrt(this.display.value).toFixed(6), 9);
   }
     
-  percent(first, second) {
-    return (first / 100) * second;
-  }
+  percent = (first, second) => (first / 100) * second;
 
-  clean = ({ target }) => {
-    this.isPressOperation = false;
-    const { value } = target;
-    let resultText = '';
+  clean = (event) => {
+    const { value } = event.target;
     const displayText = String(this.display.value);
+    let resultText = '';
+    this.isPressOperation = false;
 
     if (value === cleaningButtons.REMOVE_LAST_SYMBOL) {
 
@@ -329,8 +329,7 @@ class Calculator extends TempStorage {
         this.isPressOperation = false;
         this.isPressNumber = false;
         this.display.archive = '';
-        
-    
+
         if (displayText === '0') {
           return;
         }
@@ -347,54 +346,56 @@ class Calculator extends TempStorage {
     let dragObject = {};
 
     let self = this;
-
-    document.onmousedown = e => {
-      if (e.which !== 1) return;
+    this.addListener({selector: document, handler: 'mousedown', callback: e => {
+      if (e.which !== 1)
+        return;
 
       let elem = e.target.closest('#root');
 
-      if (!elem) return;
+      if (!elem)
+        return;
 
       dragObject.elem = elem;
       dragObject.downX = e.pageX;
       dragObject.downY = e.pageY;
 
       return false;
-    };
+      } });
 
-    document.onmousemove = e => {
-      if (!dragObject.elem) return;
-
-      if (!dragObject.avatar) {
-        let moveX = e.pageX - dragObject.downX;
-
-        let moveY = e.pageY - dragObject.downY;
-
-        if (Math.abs(moveX) < 1 && Math.abs(moveY) < 1) {
+    this.addListener({selector: document, handler: 'mousemove', callback: e => {
+        if (!dragObject.elem)
           return;
-        }
 
-        dragObject.avatar = createAvatar(e);
         if (!dragObject.avatar) {
-          dragObject = {};
-          return;
+          let moveX = e.pageX - dragObject.downX;
+          let moveY = e.pageY - dragObject.downY;
+
+          if (Math.abs(moveX) < 1 && Math.abs(moveY) < 1) {
+            return;
+          }
+
+          dragObject.avatar = createAvatar(e);
+          if (!dragObject.avatar) {
+            dragObject = {};
+            return;
+          }
+
+          let coords = getCoords(dragObject.avatar);
+          dragObject.shiftX = dragObject.downX - coords.left;
+          dragObject.shiftY = dragObject.downY - coords.top;
+
+          startDrag(e);
         }
 
-        let coords = getCoords(dragObject.avatar);
-        dragObject.shiftX = dragObject.downX - coords.left;
-        dragObject.shiftY = dragObject.downY - coords.top;
+        dragObject.avatar.style.left = e.pageX - dragObject.shiftX + 'px';
+        dragObject.avatar.style.top = e.pageY - dragObject.shiftY + 'px';
+        return false;
+      } });
 
-        startDrag(e);
-      }
 
-      dragObject.avatar.style.left = e.pageX - dragObject.shiftX + 'px';
-      dragObject.avatar.style.top = e.pageY - dragObject.shiftY + 'px';
-      return false;
-    };
-
-    document.onmouseup = e => {
+    this.addListener({selector: document, handler: 'mouseup', callback: e => {
       let elem = e.target.closest('.hat__title');
-      if (!elem) 
+      if (!elem)
         return;
 
       if (dragObject.avatar) {
@@ -403,7 +404,7 @@ class Calculator extends TempStorage {
       }
 
       dragObject = {};
-    };
+    } });
 
     let finishDrag = e => {
       let dropElem = findDroppable(e);
@@ -421,7 +422,8 @@ class Calculator extends TempStorage {
 
       let elem = e.target.closest('.hat__title');
 
-      if (!elem) return;
+      if (!elem)
+        return;
 
       let old = {
         parent: avatar.parentNode,
@@ -451,13 +453,13 @@ class Calculator extends TempStorage {
     };
 
     let findDroppable = event => {
-      dragObject.avatar.hidden = true;
-
       let elem = document.elementFromPoint(event.clientX, event.clientY);
+
+      dragObject.avatar.hidden = true;
 
       dragObject.avatar.hidden = false;
 
-      if (elem == null) {
+      if (elem === null) {
         return null;
       }
 
@@ -475,29 +477,29 @@ class Calculator extends TempStorage {
         left: box.left + pageXOffset
       };
     };
-  }
+  };
 
   control(event) {
     if (event.currentTarget.dataset.value === controlButton.OPEN ) {
       this.resizeCalc.CALC.classList.remove('none');
       this.resizeCalc.OPEN.classList.add('none');
       this.currentMode = calculatorModes.STANDARD;
-      this.addListenClass('js-insertSymbol', this.insert);
-      this.addListenClass('js-operationButton', this.operation);
-      this.addListenClass('js-cleanButton', this.clean);
-      this.addListenClass('js-resultButton', this.calculateResult);
-      this.addListenClass('js-controlButton', this.control);
+      this.addListener({selector:this.$selector, nameClass: 'js-control', callback: this.control});
+      this.addListener({selector:this.$selector, nameClass: 'js-result', callback: this.calculateResult});
+      this.addListener({selector:this.$selector, nameClass: 'js-clean', callback: this.clean});
+      this.addListener({selector:this.$selector, nameClass: 'js-operation', callback: this.operation});
+      this.addListener({selector:this.$selector, nameClass: 'js-insert', callback: this.insert});
       this.saveState();
       return;
     }
 
     switch(event.target.dataset.value) {
       case controlButton.CLOSE:
-        this.removeListenClass('js-insertSymbol', this.insert);
-        this.removeListenClass('js-operationButton', this.operation);
-        this.removeListenClass('js-cleanButton', this.clean);
-        this.removeListenClass('js-resultButton', this.calculateResult);
-        this.removeListenClass('js-controlButton', this.control);
+        this.removeListener({selector:this.$selector, nameClass: 'js-control', callback: this.control});
+        this.removeListener({selector:this.$selector, nameClass: 'js-result', callback: this.calculateResult});
+        this.removeListener({selector:this.$selector, nameClass: 'js-clean', callback: this.clean});
+        this.removeListener({selector:this.$selector, nameClass: 'js-operation', callback: this.operation});
+        this.removeListener({selector:this.$selector, nameClass: 'js-insert', callback: this.insert});
         this.setMode(calculatorModes.CLOSED);
         this.currentMode = calculatorModes.CLOSED;
         this.saveState();
@@ -516,25 +518,28 @@ class Calculator extends TempStorage {
   }
  
   saveState = () => {
-      this.saveStateCalc = {
-      MEMORY_HISTORY: this.ArrayValues, 
-      MODE: this.currentMode || 'standard',
-      X: document.querySelector('#root').style.top,
-      Y: document.querySelector('#root').style.left
+    this.saveStateCalc = {
+    MEMORY_HISTORY: this.arrayValues,
+    MODE: this.currentMode || 'standard',
+    X: document.querySelector('#root').style.top,
+    Y: document.querySelector('#root').style.left
     };
 
     this.localStorage.coordinatesStore = this.saveStateCalc;
-  }
+  };
 
-  loadFromlStorage = () => {
+  loadFromlS = () => {
     let store = this.localStorage.coordinatesStore;
     this.setMode(store.MODE);
     this.setPosition(store.X, store.Y);
     this.setMemoryList(store.MEMORY_HISTORY);
-  }
+  };
 
   setMode = (mode) => {
-      this.resizeCalc = {
+    let coordsX = window.innerWidth - 330;
+    let coordsY = window.innerHeight - 585;
+
+    this.resizeCalc = {
       CALC: this.$selector.querySelector('.calculator'),
       OPEN: this.$selector.querySelector('.openCalc'),
       CLOSE: this.$selector.querySelector('.hat__buttons-close'),
@@ -542,11 +547,7 @@ class Calculator extends TempStorage {
       ROLLUP: this.$selector.querySelector('.hat__buttons-rollUp'),
       BODY: this.$selector.querySelector('.body')
     };
-    // let x = document.body.clientWidth - 317;
-    let coordsX = window.innerWidth - 330,
-        coordsY = window.innerHeight - 585;
-        console.log(coordsX);
-        console.log(coordsY);
+
     switch(mode) {
       case calculatorModes.MINIMIZED:
         this.resizeCalc.BODY.classList.add('none');
@@ -562,21 +563,21 @@ class Calculator extends TempStorage {
       case calculatorModes.CLOSED:
         this.resizeCalc.CALC.classList.add('none');
         this.resizeCalc.OPEN.classList.remove('none');
-        document.querySelector('#root').style.position = 'relative';
         document.querySelector('#root').style.left = `${coordsX}px`;
         document.querySelector('#root').style.top = `${coordsY}px`;
         break;
       }
-  }
+  };
 
   setPosition = (x, y) => {
-    document.querySelector('#root').style.top = x;
-    document.querySelector('#root').style.left = y;
-  }
+    let style = document.querySelector('#root').style;
+    style.top = x;
+    style.left = y;
+  };
 
   setMemoryList = (lSMemoryHistory) => {
-    this.ArrayValues = lSMemoryHistory;
-  }
+    this.arrayValues = lSMemoryHistory;
+  };
 
   get template() {
     return `
@@ -584,9 +585,9 @@ class Calculator extends TempStorage {
     <div class="calculator__hat hat">
       <div class="hat__title">Calculator</div>
       <div class="hat__buttons">
-        <div class="hat__buttons-rollUp js-controlButton" data-value="minimized"></div>
-        <div class="hat__buttons-expand disabled js-controlButton" data-value="standard"></div>
-        <div class="hat__buttons-close js-controlButton" data-value="closed"></div>
+        <div class="hat__buttons-rollUp js-control" data-value="minimized"></div>
+        <div class="hat__buttons-expand disabled js-control" data-value="standard"></div>
+        <div class="hat__buttons-close js-control" data-value="closed"></div>
       </div>
     </div>
   <div class="body">
@@ -595,87 +596,87 @@ class Calculator extends TempStorage {
       <div class="calculator__keyboard">
         <div class="calculator__keyboard-container">
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-resultButton" value="percent">%</button>
+            <button class="calculator__keyboard-button--operation js-result" value="percent">%</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-operationButton" value="sqrt">√</button>
+            <button class="calculator__keyboard-button--operation js-operation" value="sqrt">√</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-operationButton" value="^">x <sup>n</sup></button>
+            <button class="calculator__keyboard-button--operation js-operation" value="^">x <sup>n</sup></button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-resultButton"
+            <button class="calculator__keyboard-button--operation js-result"
               value="fraction"><sup>1</sup>/x</button>
           </div>
         </div>
         <div class="calculator__keyboard-container">
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-cleanButton" value="CE">CE</button>
+            <button class="calculator__keyboard-button--operation js-clean" value="CE">CE</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-cleanButton" value="C">C</button>
+            <button class="calculator__keyboard-button--operation js-clean" value="C">C</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-cleanButton" value="removeLastNumber">⇐</button>
+            <button class="calculator__keyboard-button--operation js-clean" value="removeLastNumber">⇐</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-operationButton" value="/">÷</button>
-          </div>
-        </div>
-        <div class="calculator__keyboard-container">
-          <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="7">7</button>
-          </div>
-          <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="8">8</button>
-          </div>
-          <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="9">9</button>
-          </div>
-          <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-operationButton" value="*">×</button>
+            <button class="calculator__keyboard-button--operation js-operation" value="/">÷</button>
           </div>
         </div>
         <div class="calculator__keyboard-container">
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="4">4</button>
+            <button class="calculator__keyboard-button--number js-insert" value="7">7</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="5">5</button>
+            <button class="calculator__keyboard-button--number js-insert" value="8">8</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="6">6</button>
+            <button class="calculator__keyboard-button--number js-insert" value="9">9</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-operationButton" value="-">-</button>
-          </div>
-        </div>
-        <div class="calculator__keyboard-container">
-          <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="1">1</button>
-          </div>
-          <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="2">2</button>
-          </div>
-          <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="3">3</button>
-          </div>
-          <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-operationButton" value="+">+</button>
+            <button class="calculator__keyboard-button--operation js-operation" value="*">×</button>
           </div>
         </div>
         <div class="calculator__keyboard-container">
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-operationButton" value="change">±</button>
+            <button class="calculator__keyboard-button--number js-insert" value="4">4</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--number js-insertSymbol" value="0">0</button>
+            <button class="calculator__keyboard-button--number js-insert" value="5">5</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-insertSymbol" value=".">,</button>
+            <button class="calculator__keyboard-button--number js-insert" value="6">6</button>
           </div>
           <div class="calculator__keyboard-button">
-            <button class="calculator__keyboard-button--operation js-resultButton" value="=">=</button>
+            <button class="calculator__keyboard-button--operation js-operation" value="-">-</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js-insert" value="1">1</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js-insert" value="2">2</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js-insert" value="3">3</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js-operation" value="+">+</button>
+          </div>
+        </div>
+        <div class="calculator__keyboard-container">
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js-operation" value="change">±</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--number js-insert" value="0">0</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js-insert" value=".">,</button>
+          </div>
+          <div class="calculator__keyboard-button">
+            <button class="calculator__keyboard-button--operation js-result" value="=">=</button>
           </div>
         </div>
       </div>
@@ -683,7 +684,7 @@ class Calculator extends TempStorage {
     </div>
   </div>
   </div>  
-  <div class="openCalc js-controlButton none" data-value="openCalc">
+  <div class="openCalc js-control none" data-value="openCalc">
     <p class="openCalc__text" disabled="disabled">OPEN Calculator</p>
   </div>
   	`;
