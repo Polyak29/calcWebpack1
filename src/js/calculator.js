@@ -45,9 +45,13 @@ class Calculator extends TempStorage {
     this.addListenClass('js-cleanButton', this.clean);
     this.addListenClass('js-resultButton', this.calculateResult);
     this.addListenClass('js-controlButton', this.control);
-    console.log(document.body.clientWidth);
-    console.log(document.body.clientHeight);
   }
+
+  removeListenClass = (classSelector, callback) => {
+    [...this.$selector.getElementsByClassName(classSelector)].forEach(el => {
+      el.removeEventListener('click', callback.bind(this));
+    });
+  };
 
   addListenClass = (classSelector, callback) => {
     [...this.$selector.getElementsByClassName(classSelector)].forEach(el => {
@@ -203,7 +207,7 @@ class Calculator extends TempStorage {
   operation = ({ target }) => {
     this.isPressOperation = true;
     this.pressOperation = target.value;
-    let localStoreArchive ='';
+    let localStoreArchive = '';
     switch (target.value) {
       case operations.FRAC:
         this.fraction(this.display.value);
@@ -478,12 +482,22 @@ class Calculator extends TempStorage {
       this.resizeCalc.CALC.classList.remove('none');
       this.resizeCalc.OPEN.classList.add('none');
       this.currentMode = calculatorModes.STANDARD;
+      this.addListenClass('js-insertSymbol', this.insert);
+      this.addListenClass('js-operationButton', this.operation);
+      this.addListenClass('js-cleanButton', this.clean);
+      this.addListenClass('js-resultButton', this.calculateResult);
+      this.addListenClass('js-controlButton', this.control);
       this.saveState();
       return;
     }
 
     switch(event.target.dataset.value) {
       case controlButton.CLOSE:
+        this.removeListenClass('js-insertSymbol', this.insert);
+        this.removeListenClass('js-operationButton', this.operation);
+        this.removeListenClass('js-cleanButton', this.clean);
+        this.removeListenClass('js-resultButton', this.calculateResult);
+        this.removeListenClass('js-controlButton', this.control);
         this.setMode(calculatorModes.CLOSED);
         this.currentMode = calculatorModes.CLOSED;
         this.saveState();
@@ -528,10 +542,11 @@ class Calculator extends TempStorage {
       ROLLUP: this.$selector.querySelector('.hat__buttons-rollUp'),
       BODY: this.$selector.querySelector('.body')
     };
-
-    let coordsX = document.body.clientWidth - (document.body.clientWidth - 320),
-        coordsY = document.body.clientHeight + 378;
+    // let x = document.body.clientWidth - 317;
+    let coordsX = window.innerWidth - 330,
+        coordsY = window.innerHeight - 585;
         console.log(coordsX);
+        console.log(coordsY);
     switch(mode) {
       case calculatorModes.MINIMIZED:
         this.resizeCalc.BODY.classList.add('none');

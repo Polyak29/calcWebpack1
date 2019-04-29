@@ -6,7 +6,6 @@ class Memory {
     setValue: () => {},
     setLocalStorage: () => {}
   }) {
-    this.localTempDisplay = 0;
     this.events = events;
   }
 
@@ -26,7 +25,6 @@ class Memory {
             this.createItem(el);
         } );
 
-        this.localTempDisplay = this.events.getDisplayValue();
         this.events.setValue('memory', this.localTempDisplay);
         [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
             el.classList.remove('disabled');
@@ -57,17 +55,20 @@ class Memory {
   workMemory = ({ target }) => {
     switch (target.value) {
       case memoryButtons.CLEAR:
+          [...this.selector.querySelectorAll('.memory-list__item')].forEach( el => {
+            el.remove();
+          });
           this.data = [0];
+          this.createItem(0);
           this.events.setLocalStorage(this.data);
           this.events.setValue('memory', '');
           [...this.selector.getElementsByClassName('js-memory__disabled')].forEach(el => {
             el.classList.add('disabled');
           });
-
         break;
 
       case memoryButtons.READ:
-        this.events.setValue('value', this.localTempDisplay);
+        this.events.setValue('value', this.data[0]);
         break;
 
         case memoryButtons.PLUS:
@@ -125,38 +126,7 @@ class Memory {
   saveMemoryInList = () => {
     this.data.unshift(this.events.getDisplayValue());
     this.events.setLocalStorage(this.data);
-    const memoryList =  this.selector.querySelector('.memory-list');
-    let wrapper = {
-      cell: document.createElement('div'),
-      value: document.createElement('div'),
-      clear: document.createElement('div'),
-      plus: document.createElement('div'),
-      minus: document.createElement('div')
-    };
-    wrapper.cell.className = 'memory-list__item';
-
-    wrapper.value.className = 'memory-list__item-value';
-
-    wrapper.clear.className = 'memory-list__item-clear js-memory';
-    wrapper.clear.setAttribute('data-key', memoryButtons.CLEAR);
-    wrapper.clear.innerHTML = memoryButtons.CLEAR;
-
-    wrapper.plus.className = 'memory-list__item-plus js-memory';
-    wrapper.plus.setAttribute('data-key', memoryButtons.PLUS);
-    wrapper.plus.innerHTML = memoryButtons.PLUS;
-
-    wrapper.minus.className = 'memory-list__item-minus js-memory';
-    wrapper.minus.setAttribute('data-key', memoryButtons.SUBSTRUCT);
-    wrapper.minus.innerHTML = memoryButtons.SUBSTRUCT;
-
-    memoryList.insertBefore(wrapper.cell, memoryList.firstChild);
-
-    wrapper.cell.appendChild(wrapper.value).innerHTML = this.data[0];
-    wrapper.cell.appendChild(wrapper.value).setAttribute('data-value', this.data[0]);
-
-    wrapper.cell.appendChild(wrapper.clear);
-    wrapper.cell.appendChild(wrapper.plus);
-    wrapper.cell.appendChild(wrapper.minus);
+      this.createItem(this.data[0]);
   }
 
   createItem = (el) => {
